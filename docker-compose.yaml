@@ -1,0 +1,111 @@
+services:
+  analytics-service:
+    image: julianbierbaum/license-plate-system:analytics-service
+    ports:
+      - "5001:5000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: license_plate_db
+      DB_USER: analytics_user
+      DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
+
+  auth-service:
+    image: julianbierbaum/license-plate-system:auth-service
+    ports:
+      - "5002:5000"
+    environment:
+      ACTIVE_DIRECTORY_URL: "http://example:6969"
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
+
+  data-collection-service:
+    image: julianbierbaum/license-plate-system:data-collection-service
+    ports:
+      - "5003:5000"
+    volumes:
+      - ./data/municipalities.json:/app/municipalities.json
+      - ./data/logs:/app/logs
+      - ./data/snapshots:/app/snapshots
+    environment:
+      CSV_FILE: /app/logs/plate_reads.csv
+      MUNICIPALITIES_JSON_FILE: /app/municipalities.json
+      SAVE_DIR: /app/snapshots
+      SYNOLOGY_HOST: "your.synology.dev.nas.ip.or.hostname"
+      SYNOLOGY_USERNAME: "your_dev_synology_username"
+      SAVE_IMAGES_FOR_DEBUG: "False"
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: license_plate_db
+      DB_USER: data_collection_user
+      DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
+      API_KEY: ${PLATE_RECOGNIZER_API_KEY}
+      SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
+
+  notification-service:
+    image: julianbierbaum/license-plate-system:notification-service
+    ports:
+      - "5004:5000"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: license_plate_db
+      DB_USER: notification_user
+      DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      ANALYTICS_SERVICE_URL: http://analytics-service:5000
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
+
+  web-service:
+    image: julianbierbaum/license-plate-system:web-service
+    ports:
+      - "3000:3000"
+    environment:
+      AUTH_SERVICE_URL: http://auth-service:5000
+      ANALYTICS_SERVICE_URL: http://analytics-service:5000
+      NOTIFICATION_SERVICE_URL: http://notification-service:5000
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
+
+  db-migrator:
+    image: julianbierbaum/license-plate-system:db-migrator
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: license_plate_db
+      DB_USER: ${POSTGRES_ADMIN_USER}
+      DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+    command: ["alembic", "upgrade", "head"]
+
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+      POSTGRES_DB: license_plate_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:

@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+echo "Waiting for PostgreSQL to be ready..."
+until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+  echo "PostgreSQL is unavailable - sleeping"
+  sleep 1
+done
+
+echo "PostgreSQL is up - executing commands"
+
+echo "Running Alembic migrations..."
+alembic upgrade head
+
+echo "Creating users and schemas..."
+PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME \
+  -v NOTIFICATION_DB_PASSWORD="'$NOTIFICATION_DB_PASSWORD'" \
+  -v DATA_COLLECTION_DB_PASSWORD="'$DATA_COLLECTION_DB_PASSWORD'" \
+  -v ANALYTICS_DB_PASSWORD="'$ANALYTICS_DB_PASSWORD'" \
+  -f /app/init.sql
+
+echo "Database setup complete!"

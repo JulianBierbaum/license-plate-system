@@ -1,0 +1,32 @@
+# Dependency directories
+node_modules
+.pnp
+.pnp.js
+
+# Build output
+.next
+dist
+build
+out
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS / IDE files
+.DS_Store
+.vscode
+.idea
+
+# Git
+.git
+
+# Env files (keep if needed at runtime, otherwise ignore)
+.env
+.env.*
+!.env.example
+
+# Deployment-related
+.vercel
+.turbo
