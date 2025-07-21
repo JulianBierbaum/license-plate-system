@@ -1,7 +1,17 @@
 -- Create users with environment variable passwords
-CREATE USER notification_user WITH PASSWORD :'NOTIFICATION_DB_PASSWORD';
-CREATE USER data_collection_user WITH PASSWORD :'DATA_COLLECTION_DB_PASSWORD';
-CREATE USER analytics_user WITH PASSWORD :'ANALYTICS_DB_PASSWORD';
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'notification_user') THEN
+        CREATE USER notification_user WITH PASSWORD :'NOTIFICATION_DB_PASSWORD';
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'data_collection_user') THEN
+        CREATE USER data_collection_user WITH PASSWORD :'DATA_COLLECTION_DB_PASSWORD';
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'analytics_user') THEN
+        CREATE USER analytics_user WITH PASSWORD :'ANALYTICS_DB_PASSWORD';
+    END IF;
+END
+$$;
 
 -- Create schemas
 CREATE SCHEMA IF NOT EXISTS mail;

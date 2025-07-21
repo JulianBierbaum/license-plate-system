@@ -28,6 +28,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT []
 
 # Starts uvicorn server
-CMD ["uvicorn", "service:app", "--host", "0.0.0.0", "--port", "5000"]
+CMD ["python", "main.py"]
 
 EXPOSE 5000
