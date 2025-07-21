@@ -1,39 +1,38 @@
-cd services/analytics-service
+#!/bin/bash
+REPO="julianbierbaum/license-plate-system"
+PUSH=false
 
-uv sync
-docker build -t julianbierbaum/license-plate-system:analytics-service .
-docker push julianbierbaum/license-plate-system:analytics-service
+while getopts ":p" opt; do
+  case ${opt} in
+    p )
+      PUSH=true
+      ;;
+    \? )
+      echo "Invalid option: -$OPTARG" 1>&2
+      return 1
+      ;;
+  esac
+done
 
-cd ..
+(cd db && uv sync)
+docker build -t "${REPO}:db-migrator" ./db
+if [ "$PUSH" = true ]; then
+  docker push "${REPO}:db-migrator"
+fi
 
-cd auth-service
+for SERVICE_DIR in services/*/; do
+  SERVICE_NAME=$(basename "$SERVICE_DIR")
+  if [ -f "${SERVICE_DIR}pyproject.toml" ]; then
+    (cd "$SERVICE_DIR" && uv sync)
+  fi
 
-uv sync
-docker build -t julianbierbaum/license-plate-system:auth-service .
-docker push julianbierbaum/license-plate-system:auth-service
+  if [ -f "${SERVICE_DIR}package.json" ]; then
+    (cd "$SERVICE_DIR" && npm install)
+  fi
 
-cd ..
+  docker build -t "${REPO}:${SERVICE_NAME}" ./"$SERVICE_DIR"
 
-cd data-collection-service
-
-uv sync
-docker build -t julianbierbaum/license-plate-system:data-collection-service .
-docker push julianbierbaum/license-plate-system:data-collection-service
-
-cd ..
-
-cd notification-service
-
-docker build -t julianbierbaum/license-plate-system:notification-service .
-uv sync
-docker push julianbierbaum/license-plate-system:notification-service
-
-cd ..
-
-cd web-service
-
-npm install
-docker build -t julianbierbaum/license-plate-system:web-service .
-docker push julianbierbaum/license-plate-system:web-service
-
-cd ..
+  if [ "$PUSH" = true ]; then
+    docker push "${REPO}:${SERVICE_NAME}"
+  fi
+done

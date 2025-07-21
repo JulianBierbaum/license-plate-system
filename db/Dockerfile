@@ -15,7 +15,7 @@ ENV UV_LINK_MODE=copy
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+    uv sync --locked --no-dev
 
 # Copy the rest of the project source code
 COPY . /app
@@ -33,3 +33,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 ENTRYPOINT []
 
 CMD ["./entrypoint.sh"]
+    
