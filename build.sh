@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+
 REPO="julianbierbaum/license-plate-system"
 PUSH=false
 
@@ -9,7 +11,7 @@ while getopts ":p" opt; do
       ;;
     \? )
       echo "Invalid option: -$OPTARG" 1>&2
-      return 1
+      exit 1
       ;;
   esac
 done
