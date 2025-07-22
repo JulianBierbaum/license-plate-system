@@ -1,3 +1,4 @@
+# docker-compose.yml
 services:
   analytics-service:
     image: julianbierbaum/license-plate-system:analytics-service
@@ -7,7 +8,7 @@ services:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
-      DB_USER: analytics_user
+      DB_USER: ${ANALYTICS_DB_USER}
       DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
     depends_on:
       db-migrator:
@@ -18,7 +19,7 @@ services:
     ports:
       - "5002:5000"
     environment:
-      ACTIVE_DIRECTORY_URL: "http://example:6969"
+      ACTIVE_DIRECTORY_URL: ${ACTIVE_DIRECTORY_URL}
     depends_on:
       db-migrator:
         condition: service_completed_successfully
@@ -28,22 +29,21 @@ services:
     ports:
       - "5003:5000"
     volumes:
-      - ./data/municipalities.json:/app/municipalities.json
-      - ./data/logs:/app/logs
-      - ./data/snapshots:/app/snapshots
+      - ./services/data-collection-service/data/logs:/app/logs
+      - ./services/data-collection-service/data/snapshots:/app/snapshots
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
-      DB_USER: data_collection_user
+      DB_USER: ${DATA_COLLECTION_DB_USER}
       DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
-      CSV_FILE: /app/logs/plate_reads.csv
-      MUNICIPALITIES_JSON_FILE: /app/municipalities.json
-      SAVE_DIR: /app/snapshots
-      SYNOLOGY_HOST: "http://172.16.10.50:5000"
-      SYNOLOGY_USERNAME: "zotter"
+      MUNICIPALITIES_JSON_FILE: ${MUNICIPALITIES_JSON_FILE}
+      CSV_FILE: ${CSV_FILE}
+      SAVE_DIR: ${SAVE_DIR}
+      SYNOLOGY_HOST: ${SYNOLOGY_HOST}
+      SYNOLOGY_USERNAME: ${SYNOLOGY_USERNAME}
       SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
-      SAVE_IMAGES_FOR_DEBUG: "False"
+      SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
     depends_on:
       db-migrator:
@@ -57,9 +57,9 @@ services:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
-      DB_USER: notification_user
+      DB_USER: ${NOTIFICATION_DB_USER}
       DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
-      ANALYTICS_SERVICE_URL: http://analytics-service:5000
+      ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
     depends_on:
       db-migrator:
         condition: service_completed_successfully
@@ -69,9 +69,9 @@ services:
     ports:
       - "3000:3000"
     environment:
-      AUTH_SERVICE_URL: http://auth-service:5000
-      ANALYTICS_SERVICE_URL: http://analytics-service:5000
-      NOTIFICATION_SERVICE_URL: http://notification-service:5000
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
     depends_on:
       db-migrator:
         condition: service_completed_successfully
@@ -93,7 +93,7 @@ services:
 
   postgres:
     image: postgres:14-alpine
-    environment: 
+    environment:
       POSTGRES_USER: ${POSTGRES_ADMIN_USER}
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
