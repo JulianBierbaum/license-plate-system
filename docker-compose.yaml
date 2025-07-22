@@ -32,19 +32,19 @@ services:
       - ./data/logs:/app/logs
       - ./data/snapshots:/app/snapshots
     environment:
-      CSV_FILE: /app/logs/plate_reads.csv
-      MUNICIPALITIES_JSON_FILE: /app/municipalities.json
-      SAVE_DIR: /app/snapshots
-      SYNOLOGY_HOST: "your.synology.dev.nas.ip.or.hostname"
-      SYNOLOGY_USERNAME: "your_dev_synology_username"
-      SAVE_IMAGES_FOR_DEBUG: "False"
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_USER: data_collection_user
       DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
-      API_KEY: ${PLATE_RECOGNIZER_API_KEY}
+      CSV_FILE: /app/logs/plate_reads.csv
+      MUNICIPALITIES_JSON_FILE: /app/municipalities.json
+      SAVE_DIR: /app/snapshots
+      SYNOLOGY_HOST: "http://172.16.10.50:5000"
+      SYNOLOGY_USERNAME: "zotter"
       SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
+      SAVE_IMAGES_FOR_DEBUG: "False"
+      API_KEY: ${PLATE_RECOGNIZER_API_KEY}
     depends_on:
       db-migrator:
         condition: service_completed_successfully
@@ -72,6 +72,9 @@ services:
       AUTH_SERVICE_URL: http://auth-service:5000
       ANALYTICS_SERVICE_URL: http://analytics-service:5000
       NOTIFICATION_SERVICE_URL: http://notification-service:5000
+    depends_on:
+      db-migrator:
+        condition: service_completed_successfully
 
   db-migrator:
     image: julianbierbaum/license-plate-system:db-migrator
