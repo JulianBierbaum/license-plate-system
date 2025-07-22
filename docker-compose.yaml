@@ -72,9 +72,6 @@ services:
       AUTH_SERVICE_URL: http://auth-service:5000
       ANALYTICS_SERVICE_URL: http://analytics-service:5000
       NOTIFICATION_SERVICE_URL: http://notification-service:5000
-    depends_on:
-      db-migrator:
-        condition: service_completed_successfully
 
   db-migrator:
     image: julianbierbaum/license-plate-system:db-migrator
@@ -87,13 +84,13 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${POSTGRES_ADMIN_USER}
       DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
-      ANALYTICS_DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
-      DATA_COLLECTION_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      DATA_COLLECTION_DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
       NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
 
   postgres:
     image: postgres:14-alpine
-    environment:
+    environment: 
       POSTGRES_USER: ${POSTGRES_ADMIN_USER}
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
@@ -101,7 +98,6 @@ services:
       - "${DB_PORT}:${DB_PORT}"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ADMIN_USER} -d ${DB_NAME}"]
       interval: 5s
