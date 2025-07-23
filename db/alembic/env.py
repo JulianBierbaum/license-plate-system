@@ -1,35 +1,39 @@
 import os
+import sys
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
+from alembic.config import Config
 
-config = context.config
+# Add the /app directory to the Python path
+sys.path.insert(0, "/app")
+
+# Import your Base object from the active model file
+from data_collection_models import Base as DataCollectionBase
+# from analytics_models import Base as AnalyticsBase
+# from notification_models import Base as NotificationBase
+
+config: Config = context.config
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-target_metadata = None
+target_metadata = [
+    DataCollectionBase.metadata,
+    # AnalyticsBase.metadata,
+    # NotificationBase.metadata,
+]
 
 
 def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode.
-
-    This configures the context with just a URL
-    and not an Engine, though an Engine is acceptable
-    here as well.  By skipping the Engine creation
-    we don't even need a DBAPI to be available.
-
-    Calls to context.execute() here emit the given string to the
-    script output.
-
-    """
     url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
+        include_schemas=True,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
     )
@@ -39,16 +43,11 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-    """
-    db_user = os.environ.get("DB_USER")
-    db_password = os.environ.get("DB_PASSWORD")
-    db_host = os.environ.get("DB_HOST")
-    db_port = os.environ.get("DB_PORT")
-    db_name = os.environ.get("DB_NAME")
+    db_user = os.getenv("DB_USER")
+    db_password = os.getenv("DB_PASSWORD")
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_name = os.getenv("DB_NAME")
 
     sqlalchemy_url = (
         f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
@@ -62,7 +61,12 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            include_schemas=True,
+            compare_type=True,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

@@ -78,9 +78,11 @@ services:
 
   db-migrator:
     image: julianbierbaum/license-plate-system:db-migrator
-    depends_on:
-      postgres:
-        condition: service_healthy
+    volumes:
+      - ./db/alembic:/app/alembic
+      - ./services/data-collection-service/models.py:/app/data_collection_models.py
+      # - ./services/analytics-service/models.py:/app/analytics_models.py
+      # - ./services/notification-service/models.py:/app/notification_models.py
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -90,6 +92,9 @@ services:
       ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
       DATA_COLLECTION_DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
       NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:14-alpine
