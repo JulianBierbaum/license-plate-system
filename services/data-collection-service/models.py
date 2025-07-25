@@ -1,15 +1,23 @@
-from datetime import datetime
+from datetime import datetime, timezone
+import enum
 
 from sqlalchemy import (
     Column,
     DateTime,
-    Float,
     Index,
     Integer,
+    LargeBinary,
     MetaData,
     String,
+    func,
 )
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
+
+
+class VehicleOrientation(enum.Enum):
+    FRONT = "front"
+    REAR = "rear"
 
 # Create metadata with schema specification
 metadata_data_collection = MetaData(schema="ingestion_schema")
@@ -20,17 +28,27 @@ class VehicleObservation(Base):
     __tablename__ = "vehicle_observations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    timestamp = Column(DateTime, nullable=False, default=datetime.utcnow)
-    plate = Column(String(10), nullable=False)
-    confidence = Column(Float, nullable=False)
-    region = Column(String(5), nullable=True)
+    timestamp = Column(
+        DateTime(timezone=True),
+        nullable=False,
+        server_default=func.now()
+    )
+
+    plate_hash = Column(LargeBinary(32), nullable=False) # SHA256 hash
+    country = Column(String(5), nullable=True)
     vehicle_type = Column(String(50), nullable=True)
-    state = Column(String(100), nullable=True)
-    municipality = Column(String(100), nullable=True)
-    status = Column(String, nullable=True)
+
+    orientation = Column(
+        postgresql.ENUM(
+            VehicleOrientation,
+            name='vehicle_orientation',
+            create_type=True,
+            nullable=True
+        ),
+        nullable=True
+    )
 
     __table_args__ = (
         Index("idx_vehicle_observations_timestamp", "timestamp"),
-        Index("idx_vehicle_observations_plate", "plate"),
-        Index("idx_vehicle_observations_municipality", "municipality"),
+        Index("idx_vehicle_observations_plate_hash", "plate_hash"),
     )
