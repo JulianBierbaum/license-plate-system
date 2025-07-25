@@ -29,8 +29,8 @@ services:
     ports:
       - "5003:5000"
     volumes:
-      - ./services/data-collection-service/data/logs:/app/logs
-      - ./services/data-collection-service/data/snapshots:/app/snapshots
+      - ./services/data-collection-service/data/logs:${CSV_PATH}
+      - ./services/data-collection-service/data/snapshots:${SAVE_DIR}
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -38,7 +38,7 @@ services:
       DB_USER: ${DATA_COLLECTION_DB_USER}
       DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
       MUNICIPALITIES_JSON_FILE: ${MUNICIPALITIES_JSON_FILE}
-      CSV_FILE: ${CSV_FILE}
+      CSV_PATH: ${CSV_PATH}
       SAVE_DIR: ${SAVE_DIR}
       SYNOLOGY_HOST: ${SYNOLOGY_HOST}
       SYNOLOGY_USERNAME: ${SYNOLOGY_USERNAME}
@@ -80,9 +80,9 @@ services:
     image: julianbierbaum/license-plate-system:db-migrator
     volumes:
       - ./db/alembic:/app/alembic
-      - ./services/data-collection-service/models.py:/app/data_collection_models.py
-      # - ./services/analytics-service/models.py:/app/analytics_models.py
-      # - ./services/notification-service/models.py:/app/notification_models.py
+      - ./services/data-collection-service/src/models:/app/data_collection_models
+      # - ./services/analytics-service/models:/app/analytics_models
+      # - ./services/notification-service/models:/app/notification_models
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}

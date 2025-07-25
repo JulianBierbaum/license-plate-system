@@ -12,9 +12,9 @@ from alembic.config import Config
 sys.path.insert(0, "/app")
 
 # Import your Base object from the active model file
-from data_collection_models import Base as DataCollectionBase
-# from analytics_models import Base as AnalyticsBase
-# from notification_models import Base as NotificationBase
+from data_collection_models.base import Base as DataCollectionBase
+# from analytics_models.base import Base as AnalyticsBase
+# from notification_models.base import Base as NotificationBase
 
 config: Config = context.config
 
