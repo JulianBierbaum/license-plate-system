@@ -5,12 +5,12 @@ from datetime import datetime
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from config import settings
-from db.session import SessionDep
-from handlers.camera_handler import CameraHandler
-from handlers.database_handler import create_vehicle_observation
-from handlers.municipality_lookup_handler import MunicipalityHandler
-from handlers.plate_recognizer_handler import PlateRecognizerHandler
+from src.config import settings
+from src.db.session import SessionDep
+from src.handlers.camera_handler import CameraHandler
+from src.handlers.database_handler import create_vehicle_observation
+from src.handlers.municipality_lookup_handler import MunicipalityHandler
+from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
 
 app = FastAPI()
 camera_service = CameraHandler()

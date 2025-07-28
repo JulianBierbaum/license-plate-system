@@ -12,7 +12,7 @@ from alembic.config import Config
 sys.path.insert(0, "/app")
 
 # Import Base objecz
-from data_collection.models.base import IngestionBase
+from data_collection.src.models.base import IngestionBase
 # from analytics.models.base import AnalyticsBase
 # from notification.models.base import NotificationBase
 

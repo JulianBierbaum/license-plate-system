@@ -2,8 +2,8 @@ from hashlib import sha256
 
 from sqlalchemy.orm import Session
 
-from ..models.vehicle_obervation import VehicleObservation
-from ..enums.vehicle_orientation import VehicleOrientation
+from src.models.vehicle_observation import VehicleObservation
+from src.enums.vehicle_orientation import VehicleOrientation
 
 
 def hash_plate(plate: str) -> bytes:

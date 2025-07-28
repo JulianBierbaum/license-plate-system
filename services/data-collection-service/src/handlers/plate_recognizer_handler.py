@@ -3,7 +3,7 @@ from typing import Any
 
 import requests
 
-from config import settings
+from src.config import settings
 
 
 class PlateRecognizerHandler:
