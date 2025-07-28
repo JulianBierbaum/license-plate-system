@@ -80,9 +80,9 @@ services:
     image: julianbierbaum/license-plate-system:db-migrator
     volumes:
       - ./db/alembic:/app/alembic
-      - ./services/data-collection-service/src/models:/app/data_collection_models
-      # - ./services/analytics-service/models:/app/analytics_models
-      # - ./services/notification-service/models:/app/notification_models
+      - ./services/data-collection-service/src:/app/data_collection
+      # - ./services/analytics-service/src:/app/analytics
+      # - ./services/notification-service/src:/app/notification
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}

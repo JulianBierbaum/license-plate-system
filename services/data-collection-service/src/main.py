@@ -6,7 +6,9 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from config import settings
+from db.session import SessionDep
 from handlers.camera_handler import CameraHandler
+from handlers.database_handler import create_vehicle_observation
 from handlers.municipality_lookup_handler import MunicipalityHandler
 from handlers.plate_recognizer_handler import PlateRecognizerHandler
 
@@ -61,7 +63,7 @@ def log_to_csv(data: dict, timestamp: str):
 
 
 @app.post("/api/vehicle_detected")
-async def handle_vehicle_detection():
+async def handle_vehicle_detection(session: SessionDep):
     print("Vehicle detected!")
 
     try:
@@ -106,7 +108,9 @@ async def handle_vehicle_detection():
 
     # Process image with plate recognition
     result = plate_service.send_to_api(image_data=image_data)
+    print(result)
 
     log_to_csv(data=result, timestamp=timestamp)
+    create_vehicle_observation(session=session)
 
     return {"status": "ok", "timestamp": timestamp, "result": result}
