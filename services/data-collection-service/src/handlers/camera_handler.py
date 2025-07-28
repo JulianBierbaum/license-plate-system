@@ -4,7 +4,7 @@ import requests
 class SynologyCamera:
     def __init__(self, camera_data):
         self.id = camera_data.get("id")
-        self.name = camera_data.get("name")
+        self.name = camera_data.get("newName")
         self.enabled = camera_data.get("enabled", False)
         self.model = camera_data.get("model", "Unknown")
         self.vendor = camera_data.get("vendor", "Unknown")

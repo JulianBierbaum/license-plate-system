@@ -2,9 +2,10 @@ from sqlalchemy import Column, DateTime, Index, Integer, LargeBinary, String
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.sql import func
 
+from ..enums.vehicle_orientation import VehicleOrientation
+
 # relative imports needed for db-migrator service
 from ..models.base import IngestionBase
-from ..enums.vehicle_orientation import VehicleOrientation
 
 
 class VehicleObservation(IngestionBase):

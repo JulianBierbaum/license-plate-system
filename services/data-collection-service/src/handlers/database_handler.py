@@ -1,9 +1,10 @@
 from hashlib import sha256
 
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from src.models.vehicle_observation import VehicleObservation
-from src.enums.vehicle_orientation import VehicleOrientation
+from src.schemas.vehicle_observation import VehicleObservationCreate
 
 
 def hash_plate(plate: str) -> bytes:
@@ -11,15 +12,21 @@ def hash_plate(plate: str) -> bytes:
     return sha256(normalized.encode("utf-8")).digest()
 
 
-def create_vehicle_observation(session: Session) -> VehicleObservation:
-    observation = VehicleObservation(
-        plate_hash=hash_plate("so986dx"),
-        country="AT",
-        vehicle_type="car",
-        orientation=VehicleOrientation.FRONT,
+def create_vehicle_observation(
+    db: Session, observation_raw: VehicleObservationCreate
+) -> VehicleObservation:
+    db_observation = VehicleObservation(
+        plate_hash=observation_raw.plate_hash,
+        country=observation_raw.country,
+        vehicle_type=observation_raw.vehicle_type,
+        orientation=observation_raw.orientation,
     )
-    session.add(observation)
-    session.commit()
-    session.refresh(observation)
 
-    return observation
+    try:
+        db.add(db_observation)
+        db.commit()
+        db.refresh(db_observation)
+        return db_observation
+    except IntegrityError as e:
+        db.rollback()
+        raise e

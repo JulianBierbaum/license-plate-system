@@ -2,7 +2,7 @@ import csv
 import os
 from datetime import datetime
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 from src.config import settings
@@ -11,6 +11,7 @@ from src.handlers.camera_handler import CameraHandler
 from src.handlers.database_handler import create_vehicle_observation
 from src.handlers.municipality_lookup_handler import MunicipalityHandler
 from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
+from src.schemas.vehicle_detection_request import VehicleDetectionRequest
 
 app = FastAPI()
 camera_service = CameraHandler()
@@ -63,8 +64,8 @@ def log_to_csv(data: dict, timestamp: str):
 
 
 @app.post("/api/vehicle_detected")
-async def handle_vehicle_detection(session: SessionDep):
-    print("Vehicle detected!")
+async def handle_vehicle_detection(request: VehicleDetectionRequest, db: SessionDep):
+    print(f"Vehicle detected from camera: {request.camera}")
 
     try:
         sid = camera_service.authenticate_client(
@@ -75,16 +76,30 @@ async def handle_vehicle_detection(session: SessionDep):
 
         cameras = camera_service.get_camera_data(host=settings.synology_host, sid=sid)
         if not cameras:
-            raise ValueError("No cameras found")
+            raise Exception("No cameras found")
 
-        camera_id = cameras[0].id
+        target_camera = None
+        for camera in cameras:
+            if camera.name == request.camera:
+                target_camera = camera
+                break
+
+        if not target_camera:
+            raise HTTPException(
+                status_code=404, detail=f"Camera '{request.camera}' not found."
+            )
+
+        camera_id = target_camera.id
+
         frame = camera_service.get_camera_snapshot(
             host=settings.synology_host, sid=sid, camera_id=camera_id
         )
 
         if not frame:
-            raise ValueError("Failed to get snapshot")
+            raise Exception("Failed to get snapshot")
 
+    except HTTPException as e:
+        raise e
     except Exception as e:
         print(f"Camera access error: {e}")
         return JSONResponse(
@@ -111,6 +126,22 @@ async def handle_vehicle_detection(session: SessionDep):
     print(result)
 
     log_to_csv(data=result, timestamp=timestamp)
-    create_vehicle_observation(session=session)
+    from src.enums.vehicle_orientation import VehicleOrientation
+    from src.handlers.database_handler import hash_plate
+    from src.schemas.vehicle_observation import VehicleObservationCreate
 
-    return {"status": "ok", "timestamp": timestamp, "result": result}
+    data = VehicleObservationCreate(
+        plate_hash=hash_plate("so986dx"),
+        country="AT",
+        vehicle_type="car",
+        orientation=VehicleOrientation.FRONT,
+    )
+
+    try:
+        create_vehicle_observation(db=db, observation_raw=data)
+        return {"status": "ok", "timestamp": timestamp, "result": result}
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error: {str(e)}",
+        )
