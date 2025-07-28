@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from ..enums.vehicle_orientation import VehicleOrientation
+from src.enums.vehicle_orientation import VehicleOrientation
 
 
 # Schema for creating a new observation (e.g., in a POST request)
