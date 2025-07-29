@@ -52,4 +52,4 @@ uv.lock
 
 .env
 package-lock.json
-data
+snapshots

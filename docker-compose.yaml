@@ -29,16 +29,14 @@ services:
     ports:
       - "5003:5000"
     volumes:
-      - ./services/data-collection-service/data/logs:${CSV_PATH}
-      - ./services/data-collection-service/data/snapshots:${SAVE_DIR}
+      - ./services/data-collection-service/snapshots:${SAVE_DIR}
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_NAME: ${DB_NAME}
       DB_USER: ${DATA_COLLECTION_DB_USER}
       DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
-      MUNICIPALITIES_JSON_FILE: ${MUNICIPALITIES_JSON_FILE}
-      CSV_PATH: ${CSV_PATH}
+      LOG_LEVEL: ${LOG_LEVEL}
       SAVE_DIR: ${SAVE_DIR}
       SYNOLOGY_HOST: ${SYNOLOGY_HOST}
       SYNOLOGY_USERNAME: ${SYNOLOGY_USERNAME}

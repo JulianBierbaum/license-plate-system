@@ -1,5 +1,7 @@
 import requests
 
+from src.logger import logger
+
 
 class SynologyCamera:
     def __init__(self, camera_data):
@@ -40,9 +42,9 @@ class CameraHandler:
 
             return sid
         except requests.RequestException as e:
-            print(f"Network error during authentication: {e}")
+            logger.exception(f"Network error during authentication: {e}")
         except Exception as e:
-            print(f"Unexpected error during authentication: {e}")
+            logger.exception(f"Unexpected error during authentication: {e}")
 
         return ""
 
@@ -71,9 +73,9 @@ class CameraHandler:
             return result
 
         except requests.RequestException as e:
-            print(f"Network error while fetching camera data: {e}")
+            logger.exception(f"Network error while fetching camera data: {e}")
         except Exception as e:
-            print(f"Unexpected error while fetching camera data: {e}")
+            logger.exception(f"Unexpected error while fetching camera data: {e}")
 
         return []
 
@@ -98,8 +100,8 @@ class CameraHandler:
             return frame
 
         except requests.RequestException as e:
-            print(f"Network error while fetching snapshot: {e}")
+            logger.exception(f"Network error while fetching snapshot: {e}")
         except Exception as e:
-            print(f"Unexpected error while fetching snapshot: {e}")
+            logger.exception(f"Unexpected error while fetching snapshot {e}")
 
         return None

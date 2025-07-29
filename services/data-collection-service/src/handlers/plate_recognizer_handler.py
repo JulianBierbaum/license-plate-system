@@ -4,6 +4,7 @@ from typing import Any
 import requests
 
 from src.config import settings
+from src.logger import logger
 
 
 class PlateRecognizerHandler:
@@ -20,5 +21,5 @@ class PlateRecognizerHandler:
 
             return response.json()
         except requests.RequestException as e:
-            print(f"API request failed: {e}")
+            logger.exception(f"API request failed: {e}")
             return None

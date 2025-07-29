@@ -1,8 +1,8 @@
-"""base models
+"""base table for data collection
 
-Revision ID: ac4745f16432
+Revision ID: 8c55083f9b00
 Revises: 
-Create Date: 2025-07-28 10:16:23.756613
+Create Date: 2025-07-29 08:41:30.798547
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'ac4745f16432'
+revision: str = '8c55083f9b00'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -25,7 +25,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('timestamp', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
     sa.Column('plate_hash', sa.LargeBinary(length=32), nullable=False),
-    sa.Column('country', sa.String(length=5), nullable=True),
+    sa.Column('region_code', sa.String(length=5), nullable=True),
     sa.Column('vehicle_type', sa.String(length=30), nullable=True),
     sa.Column('orientation', postgresql.ENUM('FRONT', 'REAR', name='vehicle_orientation'), nullable=True),
     sa.PrimaryKeyConstraint('id'),
