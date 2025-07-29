@@ -5,20 +5,19 @@ RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/ap
 
 WORKDIR /app
 
-# Install project dependencies into that virtualenv
+COPY pyproject.toml uv.lock ./
+
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
     uv sync --locked --no-dev
 
-# Copy app source code
-COPY . /app
-
-# Make entrypoint executable
-RUN chmod +x entrypoint.sh
-
-# Step 6: Use .venv in PATH
 ENV PATH="/app/.venv/bin:$PATH"
 
+
+COPY . /app
+
+
+RUN chmod +x entrypoint.sh
+
 ENTRYPOINT []
+
 CMD ["./entrypoint.sh"]

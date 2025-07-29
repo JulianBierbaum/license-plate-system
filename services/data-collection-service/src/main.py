@@ -1,0 +1,98 @@
+import os
+from datetime import datetime
+
+from fastapi import FastAPI, HTTPException
+
+from src.config import settings
+from src.db.session import SessionDep
+from src.handlers.camera_handler import CameraHandler
+from src.handlers.database_handler import DatabaseHandler
+from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
+from src.logger import logger
+from src.schemas.vehicle_detection_request import VehicleDetectionRequest
+
+app = FastAPI()
+camera_service = CameraHandler()
+plate_service = PlateRecognizerHandler()
+db_handler = DatabaseHandler()
+
+os.makedirs(settings.save_dir, exist_ok=True)
+
+
+@app.post("/api/vehicle_detected")
+async def handle_vehicle_detection(request: VehicleDetectionRequest, db: SessionDep):
+    logger.info(f"Vehicle detected from camera: {request.camera}")
+
+    detection_time = datetime.now()
+    timestamp_str = detection_time.strftime("%Y%m%d_%H%M%S")
+
+    try:
+        sid = camera_service.authenticate_client(
+            host=settings.synology_host,
+            username=settings.synology_username,
+            password=settings.synology_password,
+        )
+
+        cameras = camera_service.get_camera_data(host=settings.synology_host, sid=sid)
+        if not cameras:
+            raise Exception("No cameras found")
+
+        target_camera = None
+        for camera in cameras:
+            if camera.name == request.camera:
+                target_camera = camera
+                break
+
+        if not target_camera:
+            raise Exception(f"Camera '{request.camera}' not found.")
+
+        camera_id = target_camera.id
+
+        frame = camera_service.get_camera_snapshot(
+            host=settings.synology_host, sid=sid, camera_id=camera_id
+        )
+
+        if not frame:
+            raise Exception("Failed to get snapshot")
+
+        image_data = frame.content
+
+        # Save image for debugging if enabled
+        if settings.save_images_for_debug:
+            filename = f"vehicle_{timestamp_str}.jpg"
+            filepath = os.path.join(settings.save_dir, filename)
+
+            try:
+                with open(filepath, "wb") as f:
+                    f.write(image_data)
+                logger.info(f"Snapshot saved to {filepath}")
+            except Exception as e:
+                logger.exception(f"Failed to save image: {e}")
+
+        # Process image with plate recognition
+        result = plate_service.send_to_api(image_data=image_data)
+        logger.debug(f"Plate Recognizer results: {result}")
+
+        observations_to_create = db_handler.new_observation(
+            reader_result=result, detection_timestamp=detection_time
+        )
+
+        for observation_data in observations_to_create:
+            if not db_handler.check_for_duplicates(
+                db=db,
+                plate_hash=observation_data.plate_hash,
+                current_detection_time=detection_time,
+            ):
+                db_handler.create_observation_entry(db=db, observation=observation_data)
+            else:
+                logger.info(
+                    f"Duplicate observation for plate hash {observation_data.plate_hash.hex()} within one minute of detection. Skipping."
+                )
+
+        return {"status": "ok", "timestamp": timestamp_str, "result": result}
+    except Exception as e:
+        logger.exception(f"Error: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Error: {str(e)}",
+        )

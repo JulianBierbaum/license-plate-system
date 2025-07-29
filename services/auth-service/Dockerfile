@@ -27,7 +27,6 @@ ENV PATH="/app/.venv/bin:$PATH"
 # Reset the entrypoint, don't invoke `uv`
 ENTRYPOINT []
 
-# Starts uvicorn server
 CMD ["python", "main.py"]
 
 EXPOSE 5000

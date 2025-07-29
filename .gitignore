@@ -51,4 +51,5 @@ uv.lock
 
 
 .env
-services/web-service/package-lock.json
+package-lock.json
+snapshots

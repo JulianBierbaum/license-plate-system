@@ -9,9 +9,6 @@ done
 
 echo "PostgreSQL is up - executing commands"
 
-echo "Running Alembic migrations..."
-alembic upgrade head
-
 echo "Creating users and schemas..."
 PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME \
   -v NOTIFICATION_DB_PASSWORD="'$NOTIFICATION_DB_PASSWORD'" \
@@ -19,5 +16,9 @@ PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME \
   -v ANALYTICS_DB_PASSWORD="'$ANALYTICS_DB_PASSWORD'" \
   -v DB_NAME="$DB_NAME" \
   -f /app/init.sql
+
+echo "Running migrations..."
+alembic upgrade head
+
 
 echo "Database setup complete!"
