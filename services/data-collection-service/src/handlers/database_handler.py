@@ -73,7 +73,7 @@ class DatabaseHandler:
             db.add(db_observation)
             db.commit()
             db.refresh(db_observation)
-            
+
             logger.info(
                 f"Observation saved. ID: {db_observation.id}, "
                 f"Timestamp: {db_observation.timestamp}, "
@@ -81,7 +81,7 @@ class DatabaseHandler:
                 f"Region: {db_observation.region_code}, "
                 f"Vehicle Type: {db_observation.vehicle_type}, "
                 f"Orientation: {db_observation.orientation.value}"
-            )            
+            )
             return db_observation
         except IntegrityError as e:
             logger.exception(f"Error creating observation entry: {e}")
