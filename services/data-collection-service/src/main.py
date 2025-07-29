@@ -16,8 +16,6 @@ camera_service = CameraHandler()
 plate_service = PlateRecognizerHandler()
 db_handler = DatabaseHandler()
 
-os.makedirs(settings.save_dir, exist_ok=True)
-
 
 @app.post("/api/vehicle_detected")
 async def handle_vehicle_detection(request: VehicleDetectionRequest, db: SessionDep):
@@ -56,18 +54,6 @@ async def handle_vehicle_detection(request: VehicleDetectionRequest, db: Session
             raise Exception("Failed to get snapshot")
 
         image_data = frame.content
-
-        # Save image for debugging if enabled
-        if settings.save_images_for_debug:
-            filename = f"vehicle_{timestamp_str}.jpg"
-            filepath = os.path.join(settings.save_dir, filename)
-
-            try:
-                with open(filepath, "wb") as f:
-                    f.write(image_data)
-                logger.info(f"Snapshot saved to {filepath}")
-            except Exception as e:
-                logger.exception(f"Failed to save image: {e}")
 
         # Process image with plate recognition
         result = plate_service.send_to_api(image_data=image_data)

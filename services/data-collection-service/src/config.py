@@ -11,14 +11,10 @@ class Settings:
     db_port: str = os.getenv("DB_PORT", "")
     db_name: str = os.getenv("DB_NAME", "")
     log_level: str = os.getenv("LOG_LEVEL", "").upper()
-    save_dir: str = os.getenv("SAVE_DIR", "")
     synology_host: str = os.getenv("SYNOLOGY_HOST", "")
     synology_username: str = os.getenv("SYNOLOGY_USERNAME", "")
     synology_password: str = os.getenv("SYNOLOGY_PASSWORD", "")
     api_key: str = os.getenv("API_KEY", "")
-    save_images_for_debug: bool = (
-        os.getenv("SAVE_IMAGES_FOR_DEBUG", "False").lower() == "true"
-    )
 
     @property
     def db_uri(self) -> PostgresDsn:

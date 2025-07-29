@@ -1,4 +1,3 @@
-# docker-compose.yml
 services:
   analytics-service:
     image: julianbierbaum/license-plate-system:analytics-service
@@ -28,8 +27,6 @@ services:
     image: julianbierbaum/license-plate-system:data-collection-service
     ports:
       - "5003:5000"
-    volumes:
-      - ./services/data-collection-service/snapshots:${SAVE_DIR}
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
@@ -37,11 +34,9 @@ services:
       DB_USER: ${DATA_COLLECTION_DB_USER}
       DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
       LOG_LEVEL: ${LOG_LEVEL}
-      SAVE_DIR: ${SAVE_DIR}
       SYNOLOGY_HOST: ${SYNOLOGY_HOST}
       SYNOLOGY_USERNAME: ${SYNOLOGY_USERNAME}
       SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
-      SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
     depends_on:
       db-migrator:
@@ -77,10 +72,7 @@ services:
   db-migrator:
     image: julianbierbaum/license-plate-system:db-migrator
     volumes:
-      - ./db/alembic:/app/alembic
-      - ./services/data-collection-service/src:/app/data_collection/src
-      # - ./services/analytics-service/src:/app/analytics/src
-      # - ./services/notification-service/src:/app/notification/src
+      - ./db/alembic/versions:/app/alembic/versions
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
