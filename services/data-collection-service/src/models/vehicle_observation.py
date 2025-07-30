@@ -25,8 +25,8 @@ class VehicleObservation(IngestionBase):
         LargeBinary(32),
         nullable=False,
     )
-    region_code = Column(
-        String(5),
+    country_code = Column(
+        String(10),
         nullable=True,
     )
     vehicle_type = Column(

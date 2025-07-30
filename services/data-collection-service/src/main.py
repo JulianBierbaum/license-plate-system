@@ -1,4 +1,3 @@
-import os
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException
@@ -6,6 +5,7 @@ from fastapi import FastAPI, HTTPException
 from src.config import settings
 from src.db.session import SessionDep
 from src.handlers.camera_handler import CameraHandler
+from src.handlers.country_fix_handler import CountryFixHandler
 from src.handlers.database_handler import DatabaseHandler
 from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
 from src.logger import logger
@@ -15,6 +15,7 @@ app = FastAPI()
 camera_service = CameraHandler()
 plate_service = PlateRecognizerHandler()
 db_handler = DatabaseHandler()
+country_fix_handler = CountryFixHandler()
 
 
 @app.post("/api/vehicle_detected")
@@ -64,9 +65,16 @@ async def handle_vehicle_detection(request: VehicleDetectionRequest, db: Session
         )
 
         for observation_data in observations_to_create:
+            if observation_data.country_code == "unknown":
+                observation_data = country_fix_handler.fix_slovenian_plates(
+                    observation=observation_data
+                )
+
+            observation_data = db_handler.hash_plate(observation=observation_data)
+
             if not db_handler.check_for_duplicates(
                 db=db,
-                plate_hash=observation_data.plate_hash,
+                observation=observation_data,
                 current_detection_time=detection_time,
             ):
                 db_handler.create_observation_entry(db=db, observation=observation_data)
