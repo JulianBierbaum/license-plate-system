@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from src.config import settings
 from src.db.session import SessionDep
@@ -17,9 +18,24 @@ plate_service = PlateRecognizerHandler()
 db_handler = DatabaseHandler()
 country_fix_handler = CountryFixHandler()
 
+basic_auth = HTTPBasic()
+
 
 @app.post("/api/vehicle_detected")
-async def handle_vehicle_detection(request: VehicleDetectionRequest, db: SessionDep):
+async def handle_vehicle_detection(
+    request: VehicleDetectionRequest,
+    db: SessionDep,
+    credentials: HTTPBasicCredentials = Depends(basic_auth),
+):
+    if (
+        credentials.username != settings.synology_username
+        or credentials.password != settings.synology_password
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect username or password",
+        )
+
     logger.info(f"Vehicle detected from camera: {request.camera}")
 
     detection_time = datetime.now()

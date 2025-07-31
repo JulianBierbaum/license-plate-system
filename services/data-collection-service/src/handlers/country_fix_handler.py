@@ -18,7 +18,7 @@ class CountryFixHandler:
             "nm",
             "po",
             "sg",
-        ) # source: https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_Slovenia
+        )  # source: https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_Slovenia
 
         plate_str = observation.plate.strip().lower()
 
