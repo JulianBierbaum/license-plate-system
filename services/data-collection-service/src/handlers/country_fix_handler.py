@@ -3,9 +3,20 @@ from src.schemas.vehicle_observation import VehicleObservationRaw
 
 
 class CountryFixHandler:
+    """Handler for fixing countries with license plate patterns
+    """
     def fix_slovenian_plates(
         self, observation: VehicleObservationRaw
     ) -> VehicleObservationRaw:
+        """fix for slovenian plates
+            (currently always returning as unknown country)
+
+        Args:
+            observation (VehicleObservationRaw): raw return data from the plate analyzer
+
+        Returns:
+            VehicleObservationRaw: raw data with fixed country when a match was found
+        """
         _municipality_list = (
             "ce",
             "go",

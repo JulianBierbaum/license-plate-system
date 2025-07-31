@@ -8,7 +8,17 @@ from src.logger import logger
 
 
 class PlateRecognizerHandler:
+    """Handler for plate recongition with the PlateRecognizer Snapshot API
+    """
     def send_to_api(self, image_data: bytes) -> Any | None:
+        """sends a new request to the api
+
+        Args:
+            image_data (bytes): snapshot image data
+
+        Returns:
+            Any | None: returns the recognition data in json or none
+        """
         try:
             image_buffer = BytesIO(image_data)
 

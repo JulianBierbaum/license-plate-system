@@ -27,6 +27,23 @@ async def handle_vehicle_detection(
     db: SessionDep,
     credentials: HTTPBasicCredentials = Depends(basic_auth),
 ):
+    """Webhook for handling new vehicle detections from an ip camera
+
+    Args:
+        request (VehicleDetectionRequest): request body with the name of the camera
+        db (SessionDep): db session
+        credentials (HTTPBasicCredentials, optional): http basic auth credentials. Defaults to Depends(basic_auth).
+
+    Raises:
+        HTTPException: 401 raised if wrong creds
+        Exception: raised if the camera data list is empty
+        Exception: raised if a camera with a specified id is not in the data list
+        Exception: raised if the snapshot collection failed
+        HTTPException: 400 raised for basic client errors
+
+    Returns:
+        _type_: _description_
+    """
     if (
         credentials.username != settings.synology_username
         or credentials.password != settings.synology_password
@@ -61,10 +78,8 @@ async def handle_vehicle_detection(
         if not target_camera:
             raise Exception(f"Camera '{request.camera}' not found.")
 
-        camera_id = target_camera.id
-
         frame = camera_service.get_camera_snapshot(
-            host=settings.synology_host, sid=sid, camera_id=camera_id
+            host=settings.synology_host, sid=sid, camera=target_camera
         )
 
         if not frame:

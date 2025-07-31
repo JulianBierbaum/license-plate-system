@@ -5,6 +5,8 @@ from pydantic_core import MultiHostUrl
 
 
 class Settings:
+    """settings class
+    """
     db_user: str = os.getenv("DB_USER", "")
     db_password: str = os.getenv("DB_PASSWORD", "")
     db_host: str = os.getenv("DB_HOST", "")

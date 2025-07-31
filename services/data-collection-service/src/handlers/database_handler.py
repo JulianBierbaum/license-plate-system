@@ -16,9 +16,20 @@ from src.schemas.vehicle_observation import (
 
 
 class DatabaseHandler:
+    """Handler for the connections to the database and saving new vehicle observations
+    """
     def new_observation(
         self, reader_result: Any, detection_timestamp: datetime
     ) -> list[VehicleObservationRaw]:
+        """extracts obervation data from analyzer result json
+
+        Args:
+            reader_result (Any): analyzer results in json format
+            detection_timestamp (datetime): timestamp when the webhook was called
+
+        Returns:
+            list[VehicleObservationRaw]: list of vehicle obervation objects
+        """
         _observation_list: list = []
 
         results_list = reader_result.get("results", [])
@@ -30,6 +41,7 @@ class DatabaseHandler:
         for observation in results_list:
             data = VehicleObservationRaw(
                 plate=observation.get("plate", ""),
+                plate_score=int(observation["candidates"][0]["score"] * 1000),
                 country_code=observation.get("region", {}).get("code", ""),
                 vehicle_type=observation.get("vehicle", {}).get("type", ""),
                 orientation=VehicleOrientation.FRONT,  # PLACEHOLDER UNTIL LICENSE UPGRADE
@@ -44,6 +56,16 @@ class DatabaseHandler:
         observation: VehicleObservationCreate,
         current_detection_time: datetime,
     ) -> bool:
+        """checks if an observation with the same plate was saved in the last minute
+
+        Args:
+            db (Session): db session
+            observation (VehicleObservationCreate): vehicle observation object
+            current_detection_time (datetime): time of the detection
+
+        Returns:
+            bool: returns true if a duplicate is found
+        """
         one_minute_before_detection = current_detection_time - timedelta(minutes=1)
         duplicate_observation = (
             db.query(VehicleObservation)
@@ -57,16 +79,25 @@ class DatabaseHandler:
             )
             .first()
         )
-        return duplicate_observation is not None  # True on Duplicate found
+        return duplicate_observation is not None
 
     def hash_plate(
         self, observation: VehicleObservationRaw
     ) -> VehicleObservationCreate:
+        """method for hashing plates for anonymisation in storage
+
+        Args:
+            observation (VehicleObservationRaw): vehicle observation object with plain plate
+
+        Returns:
+            VehicleObservationCreate: vehicle observation object with hashed plate
+        """
         normalized = observation.plate.strip().lower()
         logger.debug(f"Plate: {normalized}")
 
         return VehicleObservationCreate(
             plate_hash=sha256(normalized.encode("utf-8")).digest(),
+            plate_score=observation.plate_score,
             country_code=observation.country_code,
             vehicle_type=observation.vehicle_type,
             orientation=observation.orientation,
@@ -76,8 +107,18 @@ class DatabaseHandler:
     def create_observation_entry(
         self, db: Session, observation: VehicleObservationCreate
     ) -> VehicleObservation | None:
+        """creates a new entry in the db
+
+        Args:
+            db (Session): db session
+            observation (VehicleObservationCreate): observation object for db insertion
+
+        Returns:
+            VehicleObservation | None: returns object or none on failure
+        """
         db_observation = VehicleObservation(
             plate_hash=observation.plate_hash,
+            plate_score=observation.plate_score,
             country_code=observation.country_code,
             vehicle_type=observation.vehicle_type,
             orientation=observation.orientation,

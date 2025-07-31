@@ -1,25 +1,29 @@
 import requests
 
 from src.logger import logger
-
-
-class SynologyCamera:
-    def __init__(self, camera_data):
-        self.id = camera_data.get("id")
-        self.name = camera_data.get("newName")
-        self.enabled = camera_data.get("enabled", False)
-        self.model = camera_data.get("model", "Unknown")
-        self.vendor = camera_data.get("vendor", "Unknown")
-        self.status = camera_data.get("status", "Unknown")
-        self.resolution = camera_data.get("resolution", "Unknown")
-        self.ip = camera_data.get("host", "Unknown")
+from src.schemas.synology_camera import SynologyCamera
 
 
 class CameraHandler:
+    """Handler function for camera functionality
+    """
     def __init__(self):
         self.session = requests.Session()
 
     def authenticate_client(self, host: str, username: str, password: str) -> str:
+        """tries to authenticate client on Surveillance Station
+
+        Args:
+            host (str): ip of the nas
+            username (str): Surveillance Station username
+            password (str): Surveillance Station password
+
+        Raises:
+            Exception: thrown when authentication fails
+
+        Returns:
+            str: the session id for the connection
+        """
         try:
             auth_url = f"{host}/webapi/auth.cgi"
             auth_payload = {
@@ -38,7 +42,7 @@ class CameraHandler:
 
             sid = json_data.get("data", {}).get("sid", "")
             if not sid:
-                raise ValueError(f"Authentication failed: {json_data}")
+                raise Exception(f"Authentication failed: {json_data}")
 
             return sid
         except requests.RequestException as e:
@@ -49,7 +53,18 @@ class CameraHandler:
         return ""
 
     def get_camera_data(self, host: str, sid: str) -> list[SynologyCamera]:
+        """Gets data for all cameras connected in the Surveillance Station network
+
+        Args:
+            host (str): ip of the nas
+            sid (str): session id for the connection
+
+        Returns:
+            list[SynologyCamera]: list of camera data including camera ids
+        """
         try:
+            _cameras_list: list[SynologyCamera] = []
+
             camera_list_url = f"{host}/webapi/entry.cgi"
             camera_list_payload = {
                 "api": "SYNO.SurveillanceStation.Camera",
@@ -65,29 +80,49 @@ class CameraHandler:
 
             json_resp = cameras_response.json()
 
-            cameras_data = json_resp.get("data", {}).get("cameras", [])
+            cameras_data: list[dict] = json_resp.get("data", {}).get("cameras", [])
             if not isinstance(cameras_data, list):
-                raise ValueError(f"Unexpected cameras data format: {json_resp}")
+                logger.error(
+                    f"Unexpected cameras data format: {json_resp}. Expected a list of cameras."
+                )
+                return []
 
-            result = [SynologyCamera(cam) for cam in cameras_data]
-            return result
+            for camera_dict in cameras_data:
+                try:
+                    _cameras_list.append(SynologyCamera(**camera_dict))
+                except Exception as e:
+                    logger.warning(
+                        f"Error processing camera data: {e} - Data: {camera_dict}"
+                    )
+
+            return _cameras_list
 
         except requests.RequestException as e:
             logger.exception(f"Network error while fetching camera data: {e}")
         except Exception as e:
-            logger.exception(f"Unexpected error while fetching camera data: {e}")
+            logger.exception(f"Error while fetching camera list from API: {e}")
 
         return []
 
     def get_camera_snapshot(
-        self, host: str, sid: str, camera_id: str
+        self, host: str, sid: str, camera: SynologyCamera
     ) -> requests.Response | None:
+        """request snapshot from a selected camera
+
+        Args:
+            host (str): ip of the nas
+            sid (str): session if
+            camera (SynologyCamera): camera object containing the camera id
+
+        Returns:
+            requests.Response | None: resturns the image data of the snapshot or none if an error is thrown
+        """
         try:
             snapshot_url = f"{host}/webapi/entry.cgi"
             snapshot_payload = {
                 "api": "SYNO.SurveillanceStation.Camera",
                 "version": "9",
-                "id": camera_id,
+                "id": camera.id,
                 "profileType": 0,
                 "method": "GetSnapshot",
                 "_sid": sid,
