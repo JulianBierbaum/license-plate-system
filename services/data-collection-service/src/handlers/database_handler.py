@@ -16,8 +16,8 @@ from src.schemas.vehicle_observation import (
 
 
 class DatabaseHandler:
-    """Handler for the connections to the database and saving new vehicle observations
-    """
+    """Handler for the connections to the database and saving new vehicle observations"""
+
     def new_observation(
         self, reader_result: Any, detection_timestamp: datetime
     ) -> list[VehicleObservationRaw]:

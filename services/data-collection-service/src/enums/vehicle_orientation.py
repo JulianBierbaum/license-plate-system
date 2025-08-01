@@ -8,5 +8,6 @@ class VehicleOrientation(str, Enum):
         str (orientation): the orientation value
         Enum (name): the orientation key
     """
+
     FRONT = "front"
     REAR = "rear"

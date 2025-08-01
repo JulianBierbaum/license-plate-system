@@ -14,6 +14,7 @@ class VehicleObservation(IngestionBase):
     Args:
         IngestionBase (postgres schema): base for the ingestion schema
     """
+
     __tablename__ = "vehicle_observations"
     __table_args__ = (
         Index("idx_vehicle_observations_timestamp", "timestamp"),

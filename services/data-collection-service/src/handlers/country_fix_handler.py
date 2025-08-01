@@ -3,8 +3,8 @@ from src.schemas.vehicle_observation import VehicleObservationRaw
 
 
 class CountryFixHandler:
-    """Handler for fixing countries with license plate patterns
-    """
+    """Handler for fixing countries with license plate patterns"""
+
     def fix_slovenian_plates(
         self, observation: VehicleObservationRaw
     ) -> VehicleObservationRaw:

@@ -5,8 +5,8 @@ from src.schemas.synology_camera import SynologyCamera
 
 
 class CameraHandler:
-    """Handler function for camera functionality
-    """
+    """Handler function for camera functionality"""
+
     def __init__(self):
         self.session = requests.Session()
 

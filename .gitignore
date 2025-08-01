@@ -53,3 +53,4 @@ uv.lock
 .env
 package-lock.json
 snapshots
+.pytest_cache
