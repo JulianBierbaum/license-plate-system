@@ -1,6 +1,8 @@
 from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base
 
-ingestion_metadata = MetaData(schema="ingestion_schema")
+from ..config import settings
+
+ingestion_metadata = MetaData(schema=settings.data_collection_schema)
 
 IngestionBase = declarative_base(metadata=ingestion_metadata)

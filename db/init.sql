@@ -9,9 +9,9 @@ GRANT CONNECT ON DATABASE :DB_NAME TO analytics_user;
 GRANT CONNECT ON DATABASE :DB_NAME TO notification_user;
 
 -- Create schemas
-CREATE SCHEMA IF NOT EXISTS ingestion_schema;
-CREATE SCHEMA IF NOT EXISTS analytics_schema;
-CREATE SCHEMA IF NOT EXISTS notification_schema;
+CREATE SCHEMA IF NOT EXISTS :DATA_COLLECTION_SCHEMA;
+CREATE SCHEMA IF NOT EXISTS :ANALYTICS_SCHEMA;
+CREATE SCHEMA IF NOT EXISTS :NOTIFICATION_SCHEMA;
 
 -- Set up Data Collection Service permissions (writes to ingestion_schema)
 GRANT ALL ON SCHEMA ingestion_schema TO data_collection_user;
