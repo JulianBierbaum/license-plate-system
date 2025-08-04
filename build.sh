@@ -17,7 +17,7 @@ while getopts ":p" opt; do
 done
 
 (cd db && uv sync)
-docker build -t "${REPO}:db-migrator" ./db
+docker build -t "${REPO}:db-migrator" -f ./db/Dockerfile .
 if [ "$PUSH" = true ]; then
   docker push "${REPO}:db-migrator"
 fi

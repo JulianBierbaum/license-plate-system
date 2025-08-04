@@ -9,6 +9,12 @@ from ..models.base import IngestionBase
 
 
 class VehicleObservation(IngestionBase):
+    """SQLAlchemy model for the vehicle observation objects
+
+    Args:
+        IngestionBase (postgres schema): base for the ingestion schema
+    """
+
     __tablename__ = "vehicle_observations"
     __table_args__ = (
         Index("idx_vehicle_observations_timestamp", "timestamp"),
@@ -25,8 +31,12 @@ class VehicleObservation(IngestionBase):
         LargeBinary(32),
         nullable=False,
     )
-    region_code = Column(
-        String(5),
+    plate_score = Column(
+        Integer,
+        nullable=True,
+    )
+    country_code = Column(
+        String(10),
         nullable=True,
     )
     vehicle_type = Column(
