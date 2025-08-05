@@ -1,1 +1,1 @@
-from . import vehicle_observation as vehicle_observation
+from . import user_preferences as user_preferences

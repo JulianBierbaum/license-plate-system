@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Index, Integer, LargeBinary, String
+from sqlalchemy import Column, DateTime, Integer, LargeBinary, String
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.sql import func
 
@@ -16,20 +16,22 @@ class VehicleObservation(IngestionBase):
     """
 
     __tablename__ = "vehicle_observations"
-    __table_args__ = (
-        Index("idx_vehicle_observations_timestamp", "timestamp"),
-        Index("idx_vehicle_observations_plate_hash", "plate_hash"),
-    )
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
     timestamp = Column(
         DateTime(timezone=True),
         nullable=False,
+        index=True,
         server_default=func.now(),
     )
     plate_hash = Column(
         LargeBinary(32),
         nullable=False,
+        index=True,
     )
     plate_score = Column(
         Integer,
@@ -43,7 +45,6 @@ class VehicleObservation(IngestionBase):
         String(30),
         nullable=True,
     )
-
     orientation = Column(
         ENUM(VehicleOrientation, name="vehicle_orientation"),
         nullable=True,
