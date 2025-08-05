@@ -3,10 +3,14 @@ from hashlib import sha256
 from typing import Any
 
 from sqlalchemy import and_
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from src.enums.vehicle_orientation import VehicleOrientation
+from src.exceptions.database_exceptions import (
+    DatabaseIntegrityError,
+    DatabaseQueryError,
+)
 from src.logger import logger
 from src.models.vehicle_observation import VehicleObservation
 from src.schemas.vehicle_observation import (
@@ -31,7 +35,6 @@ class DatabaseHandler:
             list[VehicleObservationRaw]: list of vehicle obervation objects
         """
         _observation_list: list = []
-
         results_list = reader_result.get("results", [])
 
         if not results_list:
@@ -39,15 +42,21 @@ class DatabaseHandler:
             return _observation_list
 
         for observation in results_list:
-            data = VehicleObservationRaw(
-                plate=observation.get("plate", ""),
-                plate_score=int(observation["candidates"][0]["score"] * 1000),
-                country_code=observation.get("region", {}).get("code", ""),
-                vehicle_type=observation.get("vehicle", {}).get("type", ""),
-                orientation=VehicleOrientation.FRONT,  # PLACEHOLDER UNTIL LICENSE UPGRADE
-                timestamp=detection_timestamp,
-            )
-            _observation_list.append(data)
+            try:
+                data = VehicleObservationRaw(
+                    plate=observation.get("plate", ""),
+                    plate_score=int(observation["candidates"][0]["score"] * 1000),
+                    country_code=observation.get("region", {}).get("code", ""),
+                    vehicle_type=observation.get("vehicle", {}).get("type", ""),
+                    orientation=VehicleOrientation.FRONT,
+                    timestamp=detection_timestamp,
+                )
+                _observation_list.append(data)
+            except (KeyError, IndexError, TypeError) as e:
+                logger.exception(
+                    f"Malformed observation entry: {e}. Data: {observation}"
+                )
+                continue
         return _observation_list
 
     def check_for_duplicates(
@@ -62,24 +71,29 @@ class DatabaseHandler:
             db (Session): db session
             observation (VehicleObservationCreate): vehicle observation object
             current_detection_time (datetime): time of the detection
+        Raises:
+            DatabaseQueryError: raised when an error occures in the db query
 
         Returns:
             bool: returns true if a duplicate is found
         """
-        one_minute_before_detection = current_detection_time - timedelta(minutes=1)
-        duplicate_observation = (
-            db.query(VehicleObservation)
-            .filter(
-                and_(
-                    VehicleObservation.plate_hash == observation.plate_hash,
-                    VehicleObservation.timestamp >= one_minute_before_detection,
-                    VehicleObservation.timestamp
-                    <= current_detection_time,  # If the entry is in the future for sume reason
+        try:
+            one_minute_before_detection = current_detection_time - timedelta(minutes=1)
+            duplicate_observation = (
+                db.query(VehicleObservation)
+                .filter(
+                    and_(
+                        VehicleObservation.plate_hash == observation.plate_hash,
+                        VehicleObservation.timestamp >= one_minute_before_detection,
+                        VehicleObservation.timestamp
+                        <= current_detection_time,  # If the entry is in the future for sume reason
+                    )
                 )
+                .first()
             )
-            .first()
-        )
-        return duplicate_observation is not None
+            return duplicate_observation is not None
+        except SQLAlchemyError as e:
+            raise DatabaseQueryError("Error while checking for duplicates.") from e
 
     def hash_plate(
         self, observation: VehicleObservationRaw
@@ -113,6 +127,9 @@ class DatabaseHandler:
             db (Session): db session
             observation (VehicleObservationCreate): observation object for db insertion
 
+        Raises:
+            DatabaseIntegrityError: raised when the database throws an integrity error
+
         Returns:
             VehicleObservation | None: returns object or none on failure
         """
@@ -140,4 +157,6 @@ class DatabaseHandler:
             )
             return db_observation
         except IntegrityError as e:
-            logger.exception(f"Error creating observation entry: {e}")
+            raise DatabaseIntegrityError(
+                "Duplicate entry or integrity violation."
+            ) from e
