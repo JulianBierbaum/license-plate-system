@@ -31,19 +31,24 @@ class CountryFixHandler:
             "sg",
         )  # source: https://en.wikipedia.org/wiki/Vehicle_registration_plates_of_Slovenia
 
+        if observation.country_code != "unknown":
+            return observation
+
         plate_str = observation.plate.strip().lower()
 
-        if len(plate_str) >= 2:
-            plate_code = plate_str[:2]
+        if len(plate_str) < 2:
+            logger.debug(f"Plate '{observation.plate}' too short to be a valid plate")
+            return observation
 
-            if plate_code in _municipality_list:
-                observation.country_code = "si"
+        plate_code = plate_str[:2]
 
-                logger.info(
-                    f"Fixed plate '{observation.plate}': "
-                    f"country changed to {observation.country_code}"
-                )
-                return observation
+        if plate_code in _municipality_list:
+            observation.country_code = "si"
 
-        logger.info(f"No Slovenian region fix applied for plate {observation.plate}")
+            logger.info(
+                f"Fixed plate '{observation.plate}' country changed to {observation.country_code}"
+            )
+            return observation
+
+        logger.debug(f"No Slovenian region fix applied for plate {observation.plate}")
         return observation
