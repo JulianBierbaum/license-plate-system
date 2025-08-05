@@ -10,7 +10,7 @@ from tenacity import (
 )
 
 from src.config import settings
-from src.logger import logger
+from src.exceptions.plate_recognizer_exceptions import PlateRecognizerCallError
 
 
 class PlateRecognizerHandler:
@@ -19,17 +19,21 @@ class PlateRecognizerHandler:
     @retry(
         wait=wait_fixed(1),
         stop=stop_after_attempt(5),
-        retry=retry_if_exception_type(requests.exceptions.HTTPError),
+        retry=retry_if_exception_type(requests.HTTPError),
         reraise=True,
     )
-    def send_to_api(self, image_data: bytes) -> Any | None:
+    def send_to_api(self, image_data: bytes) -> Any:
         """sends a new request to the api
 
         Args:
             image_data (bytes): snapshot image data
 
+        Raises:
+            PlateRecognizerCallError: raised if the api returns fails
+            Exception: thrown on unexpected errors
+
         Returns:
-            Any | None: returns the recognition data in json or none
+            Any: response json with plate and vehicle data
         """
         try:
             image_buffer = BytesIO(image_data)
@@ -43,9 +47,9 @@ class PlateRecognizerHandler:
             response.raise_for_status()
 
             return response.json()
-        except requests.exceptions.RequestException as e:
-            logger.error(f"PlateRecognizer API request failed: {e}")
+        except requests.RequestException as e:
+            raise PlateRecognizerCallError(
+                f"Error when calling the Plate Recognizer api: {e}"
+            )
+        except Exception:
             raise
-        except Exception as e:
-            logger.exception(f"Error in PlateRecognizerHandler: {e}")
-            return None

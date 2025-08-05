@@ -1,5 +1,11 @@
 import requests
+from requests.exceptions import RequestException
 
+from src.exceptions.camera_exceptions import (
+    AuthenticationError,
+    CameraDataError,
+    SnapshotError,
+)
 from src.logger import logger
 from src.schemas.synology_camera import SynologyCamera
 
@@ -11,18 +17,17 @@ class CameraHandler:
         self.session = requests.Session()
 
     def authenticate_client(self, host: str, username: str, password: str) -> str:
-        """tries to authenticate client on Surveillance Station
-
+        """Tries to authenticate client on Surveillance Station.
         Args:
             host (str): ip of the nas
             username (str): Surveillance Station username
             password (str): Surveillance Station password
 
         Raises:
-            Exception: thrown when authentication fails
+            AuthenticationError: If authentication fails for any reason.
 
         Returns:
-            str: the session id for the connection
+            str: The session id for the connection.
         """
         try:
             auth_url = f"{host}/webapi/auth.cgi"
@@ -40,31 +45,34 @@ class CameraHandler:
             res.raise_for_status()
             json_data = res.json()
 
-            sid = json_data.get("data", {}).get("sid", "")
+            sid = json_data.get("data", {}).get("sid")
             if not sid:
-                raise Exception(f"Authentication failed: {json_data}")
+                raise AuthenticationError(
+                    f"Authentication failed: No SID returned. Response: {json_data}"
+                )
 
             return sid
-        except requests.RequestException as e:
-            logger.exception(f"Network error during authentication: {e}")
-        except Exception as e:
-            logger.exception(f"Unexpected error during authentication: {e}")
-
-        return ""
+        except RequestException as e:
+            raise AuthenticationError(
+                f"Network error during authentication: {e}"
+            ) from e
+        except Exception:
+            raise
 
     def get_camera_data(self, host: str, sid: str) -> list[SynologyCamera]:
-        """Gets data for all cameras connected in the Surveillance Station network
-
+        """Gets data for all cameras connected in the Surveillance Station network.
         Args:
             host (str): ip of the nas
             sid (str): session id for the connection
 
+        Raises:
+            CameraDataError: If camera data cannot be fetched or is malformed.
+
         Returns:
-            list[SynologyCamera]: list of camera data including camera ids
+            list[SynologyCamera]: List of camera data.
         """
         try:
             _cameras_list: list[SynologyCamera] = []
-
             camera_list_url = f"{host}/webapi/entry.cgi"
             camera_list_payload = {
                 "api": "SYNO.SurveillanceStation.Camera",
@@ -79,43 +87,40 @@ class CameraHandler:
             cameras_response.raise_for_status()
 
             json_resp = cameras_response.json()
-
             cameras_data: list[dict] = json_resp.get("data", {}).get("cameras", [])
+
             if not isinstance(cameras_data, list):
-                logger.error(
-                    f"Unexpected cameras data format: {json_resp}. Expected a list of cameras."
-                )
-                return []
+                raise CameraDataError("Unexpected cameras data format. Expected a list")
 
             for camera_dict in cameras_data:
                 try:
                     _cameras_list.append(SynologyCamera(**camera_dict))
                 except Exception as e:
                     logger.warning(
-                        f"Error processing camera data: {e} - Data: {camera_dict}"
+                        f"Skipping malformed camera data: {e} - Data: {camera_dict}"
                     )
-
             return _cameras_list
-
-        except requests.RequestException as e:
-            logger.exception(f"Network error while fetching camera data: {e}")
-        except Exception as e:
-            logger.exception(f"Error while fetching camera list from API: {e}")
-
-        return []
+        except RequestException as e:
+            raise CameraDataError(
+                f"Network error while fetching camera data: {e}"
+            ) from e
+        except Exception:
+            raise
 
     def get_camera_snapshot(
         self, host: str, sid: str, camera: SynologyCamera
-    ) -> requests.Response | None:
-        """request snapshot from a selected camera
-
+    ) -> requests.Response:
+        """Requests snapshot from a selected camera.
         Args:
             host (str): ip of the nas
             sid (str): session if
             camera (SynologyCamera): camera object containing the camera id
 
+        Raises:
+            SnapshotError: If the snapshot cannot be retrieved.
+
         Returns:
-            requests.Response | None: resturns the image data of the snapshot or none if an error is thrown
+            requests.Response: The image data of the snapshot.
         """
         try:
             snapshot_url = f"{host}/webapi/entry.cgi"
@@ -133,10 +138,7 @@ class CameraHandler:
             )
             frame.raise_for_status()
             return frame
-
-        except requests.RequestException as e:
-            logger.exception(f"Network error while fetching snapshot: {e}")
-        except Exception as e:
-            logger.exception(f"Unexpected error while fetching snapshot {e}")
-
-        return None
+        except RequestException as e:
+            raise SnapshotError(f"Network error while fetching snapshot: {e}") from e
+        except Exception:
+            raise
