@@ -1,7 +1,17 @@
 [project]
 name = "auth-service"
 version = "0.1.0"
-description = "Add your description here"
+description = "Responsible for JWTs and authentication using the Active Directory of Zotter"
 readme = "README.md"
-requires-python = ">=3.13"
-dependencies = []
+requires-python = ">=3.12"
+dependencies = [
+    "app>=0.0.1",
+    "dotenv>=0.9.9",
+    "fastapi[standard]>=0.116.1",
+    "ldap3>=2.9.1",
+    "pycryptodome>=3.23.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "pyjwt>=2.10.1",
+    "sqlalchemy>=2.0.42",
+]
