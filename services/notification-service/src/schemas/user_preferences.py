@@ -13,12 +13,13 @@ class UserPreferencesBase(BaseModel):
 
 
 class UserPreferencesCreate(UserPreferencesBase):
-    """"schema for creating a new user preferences entry"""
+    """ "schema for creating a new user preferences entry"""
 
     pass
 
+
 class UserPreferencesUpdate(UserPreferencesBase):
-    """"schema for updating a user preferences entry"""
+    """ "schema for updating a user preferences entry"""
 
     name: str | None = None
     email: EmailStr | None = None
@@ -27,7 +28,7 @@ class UserPreferencesUpdate(UserPreferencesBase):
 
 
 class UserPreferenceInDB(UserPreferencesBase):
-    """"schema for db representation of user preferences"""
+    """ "schema for db representation of user preferences"""
 
     id: int
     created_at: datetime
@@ -35,6 +36,7 @@ class UserPreferenceInDB(UserPreferencesBase):
 
     class Config:
         from_attributes = True
+
 
 class UserPreference(UserPreferenceInDB):
     """user preferences representation schema"""

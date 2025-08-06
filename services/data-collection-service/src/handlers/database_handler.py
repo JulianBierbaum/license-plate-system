@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Any
 
-from sqlalchemy import and_
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import and_, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from src.enums.vehicle_orientation import VehicleOrientation
@@ -79,21 +79,20 @@ class DatabaseHandler:
         """
         try:
             one_minute_before_detection = current_detection_time - timedelta(minutes=1)
-            duplicate_observation = (
-                db.query(VehicleObservation)
-                .filter(
-                    and_(
-                        VehicleObservation.plate_hash == observation.plate_hash,
-                        VehicleObservation.timestamp >= one_minute_before_detection,
-                        VehicleObservation.timestamp
-                        <= current_detection_time,  # If the entry is in the future for sume reason
-                    )
+            stmt = select(
+                VehicleObservation
+            ).where(
+                and_(
+                    VehicleObservation.plate_hash == observation.plate_hash,
+                    VehicleObservation.timestamp >= one_minute_before_detection,
+                    VehicleObservation.timestamp
+                    <= current_detection_time,  # If the entry is in the future for sume reason
                 )
-                .first()
             )
+            duplicate_observation = db.execute(stmt).scalars().first()
             return duplicate_observation is not None
         except SQLAlchemyError as e:
-            raise DatabaseQueryError("Error while checking for duplicates.") from e
+            raise DatabaseQueryError("Error while checking for duplicates") from e
 
     def hash_plate(
         self, observation: VehicleObservationRaw
@@ -156,7 +155,5 @@ class DatabaseHandler:
                 f"Orientation: {db_observation.orientation.value}"
             )
             return db_observation
-        except IntegrityError as e:
-            raise DatabaseIntegrityError(
-                "Duplicate entry or integrity violation."
-            ) from e
+        except SQLAlchemyError as e:
+            raise DatabaseIntegrityError("Insertion into database failed") from e

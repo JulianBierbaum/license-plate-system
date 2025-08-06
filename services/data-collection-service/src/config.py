@@ -1,32 +1,34 @@
-import os
-
-from pydantic import PostgresDsn
-from pydantic_core import MultiHostUrl
+from pydantic import Field, PostgresDsn
+from pydantic_settings import BaseSettings
 
 
-class Settings:
-    """settings class"""
+class Settings(BaseSettings):
+    """Settings for the Data Collection Service"""
 
-    db_user: str = os.getenv("DB_USER", "")
-    db_password: str = os.getenv("DB_PASSWORD", "")
-    db_host: str = os.getenv("DB_HOST", "")
-    db_port: str = os.getenv("DB_PORT", "")
-    db_name: str = os.getenv("DB_NAME", "")
-    data_collection_schema: str = os.getenv("DATA_COLLECTION_SCHEMA", "")
-    log_level: str = os.getenv("LOG_LEVEL", "").upper()
-    synology_host: str = os.getenv("SYNOLOGY_HOST", "")
-    synology_username: str = os.getenv("SYNOLOGY_USERNAME", "")
-    synology_password: str = os.getenv("SYNOLOGY_PASSWORD", "")
-    api_key: str = os.getenv("API_KEY", "")
+    # Database settings
+    db_user: str = Field(..., env="DB_USER")
+    db_password: str = Field(..., env="DB_PASSWORD")
+    db_host: str = Field(..., env="DB_HOST")
+    db_port: int = Field(..., env="DB_PORT")
+    db_name: str = Field(..., env="DB_NAME")
+    data_collection_schema: str = Field(..., env="DATA_COLLECTION_SCHEMA")
+
+    # Service-specific settings
+    log_level: str = Field("INFO", env="LOG_LEVEL")
+    synology_host: str = Field(..., env="SYNOLOGY_HOST")
+    synology_username: str = Field(..., env="SYNOLOGY_USERNAME")
+    synology_password: str = Field(..., env="SYNOLOGY_PASSWORD")
+    api_key: str = Field(..., env="API_KEY")
 
     @property
     def db_uri(self) -> PostgresDsn:
-        return MultiHostUrl.build(
+        """Constructs the PostgreSQL connection URI."""
+        return PostgresDsn.build(
             scheme="postgresql+psycopg2",
             username=self.db_user,
             password=self.db_password,
             host=self.db_host,
-            port=int(self.db_port),
+            port=self.db_port,
             path=self.db_name,
         )
 

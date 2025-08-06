@@ -109,7 +109,7 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
             )
 
             image_data = frame.content
-            result = plate_service.send_to_api(image_data=image_data)
+            result = plate_service.send_to_api(image_data=image_data, camera_name=camera_name)
             if not result:
                 logger.info("Plate Recognizer returned no actual observations")
                 return

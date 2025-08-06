@@ -1,8 +1,7 @@
 from sqlalchemy import MetaData
 from sqlalchemy.orm import declarative_base
+import os
 
-from ..config import settings
-
-notification_metadata = MetaData(schema=settings.notification_schema)
+notification_metadata = MetaData(schema=os.getenv("NOTIFICATION_SCHEMA"))
 
 NotificationBase = declarative_base(metadata=notification_metadata)

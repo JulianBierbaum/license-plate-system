@@ -34,13 +34,13 @@ class UserPreferences(NotificationBase):
         Boolean,
         nullable=False,
         index=True,
-        server_default=text('false'),
+        server_default=text("false"),
     )
     receive_updates = Column(
         Boolean,
         nullable=False,
         index=True,
-        server_default=text('false'),
+        server_default=text("false"),
     )
     created_at = Column(
         DateTime(timezone=True),
