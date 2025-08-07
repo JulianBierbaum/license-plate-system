@@ -17,7 +17,7 @@ from src.exceptions.database_exceptions import (
 )
 from src.exceptions.plate_recognizer_exceptions import PlateRecognizerCallError
 from src.handlers.camera_handler import CameraHandler
-from src.handlers.country_fix_handler import CountryFixHandler
+from src.handlers.country_handler import CountryHandler
 from src.handlers.database_handler import DatabaseHandler
 from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
 from src.logger import logger
@@ -27,7 +27,7 @@ app = FastAPI()
 camera_service = CameraHandler()
 plate_service = PlateRecognizerHandler()
 db_handler = DatabaseHandler()
-country_fix_handler = CountryFixHandler()
+country_handler = CountryHandler()
 
 basic_auth = HTTPBasic()
 
@@ -109,7 +109,9 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
             )
 
             image_data = frame.content
-            result = plate_service.send_to_api(image_data=image_data, camera_name=camera_name)
+            result = plate_service.send_to_api(
+                image_data=image_data, camera_name=camera_name
+            )
             if not result:
                 logger.info("Plate Recognizer returned no actual observations")
                 return
@@ -122,7 +124,7 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
 
             for observation_data in observations_to_create:
                 if observation_data.country_code == "unknown":
-                    observation_data = country_fix_handler.fix_slovenian_plates(
+                    observation_data = country_handler.fix_slovenian_plates(
                         observation=observation_data
                     )
 

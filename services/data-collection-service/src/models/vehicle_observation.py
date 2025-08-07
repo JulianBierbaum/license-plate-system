@@ -41,7 +41,23 @@ class VehicleObservation(IngestionBase):
         String(10),
         nullable=True,
     )
+    municipality = Column(
+        String(10),
+        nullable=True,
+    )
     vehicle_type = Column(
+        String(30),
+        nullable=True,
+    )
+    make = Column(
+        String(30),
+        nullable=True,
+    )
+    model = Column(
+        String(50),
+        nullable=True,
+    )
+    color = Column(
         String(30),
         nullable=True,
     )

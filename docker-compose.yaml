@@ -43,8 +43,8 @@ services:
       SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
     depends_on:
-      db-migrator:
-        condition: service_completed_successfully
+      plate-recognizer:
+        condition: service_healthy
 
   notification-service:
     image: julianbierbaum/license-plate-system:notification-service
@@ -76,6 +76,23 @@ services:
     depends_on:
       db-migrator:
         condition: service_completed_successfully
+
+  plate-recognizer:
+    image: platerecognizer/alpr:latest
+    volumes:
+      - license:/license
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY}
+      TOKEN: ${PLATE_RECOGNIZER_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   db-migrator:
     image: julianbierbaum/license-plate-system:db-migrator
@@ -116,3 +133,4 @@ services:
 
 volumes:
   postgres_data:
+  license:

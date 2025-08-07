@@ -53,9 +53,7 @@ class CameraHandler:
 
             return sid
         except RequestException as e:
-            raise AuthenticationError(
-                f"Network error during authentication"
-            ) from e
+            raise AuthenticationError("Network error during authentication") from e
         except Exception:
             raise
 
@@ -101,9 +99,7 @@ class CameraHandler:
                     )
             return _cameras_list
         except RequestException as e:
-            raise CameraDataError(
-                f"Network error while fetching camera data."
-            ) from e
+            raise CameraDataError("Network error while fetching camera data.") from e
         except Exception:
             raise
 
@@ -139,6 +135,6 @@ class CameraHandler:
             frame.raise_for_status()
             return frame
         except RequestException as e:
-            raise SnapshotError(f"Network error while fetching snapshot") from e
+            raise SnapshotError("Network error while fetching snapshot") from e
         except Exception:
             raise

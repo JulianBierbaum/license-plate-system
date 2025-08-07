@@ -39,8 +39,13 @@ class PlateRecognizerHandler:
             image_buffer = BytesIO(image_data)
 
             response = requests.post(
-                "https://api.platerecognizer.com/v1/plate-reader/",
-                data={"camera_id": camera_name, "regions": ["at", "hu", "si"]},
+                "http://plate-recognizer:8080/v1/plate-reader/",
+                data={
+                    "camera_id": camera_name,
+                    "regions": ["at", "hu", "si"],
+                    "mmc": "true",
+                    "direction": "true",
+                },
                 files={"upload": image_buffer},
                 headers={"Authorization": f"Token {settings.api_key}"},
                 timeout=15,

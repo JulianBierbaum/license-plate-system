@@ -47,8 +47,12 @@ class DatabaseHandler:
                     plate=observation.get("plate", ""),
                     plate_score=int(observation["candidates"][0]["score"] * 1000),
                     country_code=observation.get("region", {}).get("code", ""),
+                    municipality=None,
                     vehicle_type=observation.get("vehicle", {}).get("type", ""),
-                    orientation=VehicleOrientation.FRONT,
+                    make=observation["model_make"][0]["make"],
+                    model=observation["model_make"][0]["model"],
+                    color=observation["color"][0]["color"],
+                    orientation=VehicleOrientation(observation["orientation"][0]["orientation"].lower()),
                     timestamp=detection_timestamp,
                 )
                 _observation_list.append(data)
@@ -112,7 +116,11 @@ class DatabaseHandler:
             plate_hash=sha256(normalized.encode("utf-8")).digest(),
             plate_score=observation.plate_score,
             country_code=observation.country_code,
+            municipality=observation.municipality,
             vehicle_type=observation.vehicle_type,
+            make=observation.make,
+            model=observation.model,
+            color=observation.color,
             orientation=observation.orientation,
             timestamp=observation.timestamp,
         )
@@ -136,7 +144,11 @@ class DatabaseHandler:
             plate_hash=observation.plate_hash,
             plate_score=observation.plate_score,
             country_code=observation.country_code,
+            municipality=observation.municipality,
             vehicle_type=observation.vehicle_type,
+            make=observation.make,
+            model=observation.model,
+            color=observation.color,
             orientation=observation.orientation,
             timestamp=observation.timestamp,
         )
@@ -150,8 +162,12 @@ class DatabaseHandler:
                 f"Observation saved. ID: {db_observation.id}, "
                 f"Timestamp: {db_observation.timestamp}, "
                 f"Plate Hash: {db_observation.plate_hash.hex()}, "
-                f"Region: {db_observation.country_code}, "
+                f"Country: {db_observation.country_code}, "
+                f"Municipality: {db_observation.municipality or "-"}, "
                 f"Vehicle Type: {db_observation.vehicle_type}, "
+                f"Make: {db_observation.make}, "
+                f"Model: {db_observation.model}, "
+                f"Color: {db_observation.color}, "
                 f"Orientation: {db_observation.orientation.value}"
             )
             return db_observation

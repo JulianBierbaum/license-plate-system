@@ -2,7 +2,7 @@ from src.logger import logger
 from src.schemas.vehicle_observation import VehicleObservationRaw
 
 
-class CountryFixHandler:
+class CountryHandler:
     """Handler for fixing countries with license plate patterns"""
 
     def fix_slovenian_plates(

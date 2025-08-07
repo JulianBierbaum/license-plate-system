@@ -11,12 +11,10 @@ from src.schemas.vehicle_observation import (
     VehicleObservationRaw,
 )
 
-
 @pytest.fixture
 def db_handler():
     """Fixture for DatabaseHandler instance."""
     return DatabaseHandler()
-
 
 # --- Tests for new_observation ---
 def test_new_observation_successful_extraction(db_handler):
@@ -31,6 +29,9 @@ def test_new_observation_successful_extraction(db_handler):
                 "candidates": [{"score": 0.95}],
                 "region": {"code": "US"},
                 "vehicle": {"type": "car"},
+                "model_make": [{"make": "Toyota", "model": "Corolla", "score": 0.9}],
+                "color": [{"color": "red", "score": 0.8}],
+                "orientation": [{"orientation": "Front", "score": 1.0}],
             }
         ]
     }
@@ -43,9 +44,11 @@ def test_new_observation_successful_extraction(db_handler):
     assert obs.plate_score == 950
     assert obs.country_code == "US"
     assert obs.vehicle_type == "car"
+    assert obs.make == "Toyota"
+    assert obs.model == "Corolla"
+    assert obs.color == "red"
     assert obs.orientation == VehicleOrientation.FRONT
     assert obs.timestamp == detection_timestamp
-
 
 def test_new_observation_empty_results(db_handler):
     """
@@ -56,7 +59,6 @@ def test_new_observation_empty_results(db_handler):
 
     observations = db_handler.new_observation(reader_result, detection_timestamp)
     assert len(observations) == 0
-
 
 def test_new_observation_multiple_observations(db_handler):
     """
@@ -70,21 +72,36 @@ def test_new_observation_multiple_observations(db_handler):
                 "candidates": [{"score": 0.95}],
                 "region": {"code": "US"},
                 "vehicle": {"type": "car"},
+                "model_make": [{"make": "Toyota", "model": "Corolla", "score": 0.9}],
+                "color": [{"color": "red", "score": 0.8}],
+                "orientation": [{"orientation": "Front", "score": 1.0}],
             },
             {
                 "plate": "XYZ789",
                 "candidates": [{"score": 0.88}],
                 "region": {"code": "CA"},
                 "vehicle": {"type": "truck"},
+                "model_make": [{"make": "Ford", "model": "F-150", "score": 0.85}],
+                "color": [{"color": "blue", "score": 0.7}],
+                "orientation": [{"orientation": "Rear", "score": 1.0}],
             },
         ]
     }
 
     observations = db_handler.new_observation(reader_result, detection_timestamp)
     assert len(observations) == 2
-    assert observations[0].plate == "ABC1234"
-    assert observations[1].plate == "XYZ789"
+    obs1, obs2 = observations
+    assert obs1.plate == "ABC1234"
+    assert obs1.make == "Toyota"
+    assert obs1.model == "Corolla"
+    assert obs1.color == "red"
+    assert obs1.orientation == VehicleOrientation.FRONT
 
+    assert obs2.plate == "XYZ789"
+    assert obs2.make == "Ford"
+    assert obs2.model == "F-150"
+    assert obs2.color == "blue"
+    assert obs2.orientation == VehicleOrientation.REAR
 
 # --- Tests for hash_plate ---
 def test_hash_plate_standard(db_handler):
@@ -96,6 +113,9 @@ def test_hash_plate_standard(db_handler):
         plate_score=900,
         country_code="US",
         vehicle_type="car",
+        make="Toyota",
+        model="Corolla",
+        color="red",
         orientation=VehicleOrientation.FRONT,
         timestamp=datetime.now(),
     )
@@ -106,9 +126,11 @@ def test_hash_plate_standard(db_handler):
     assert hashed_obs.plate_score == raw_obs.plate_score
     assert hashed_obs.country_code == raw_obs.country_code
     assert hashed_obs.vehicle_type == raw_obs.vehicle_type
+    assert hashed_obs.make == raw_obs.make
+    assert hashed_obs.model == raw_obs.model
+    assert hashed_obs.color == raw_obs.color
     assert hashed_obs.orientation == raw_obs.orientation
     assert hashed_obs.timestamp == raw_obs.timestamp
-
 
 def test_hash_plate_with_spaces_and_case(db_handler):
     """
@@ -119,6 +141,9 @@ def test_hash_plate_with_spaces_and_case(db_handler):
         plate_score=900,
         country_code="US",
         vehicle_type="car",
+        make="Toyota",
+        model="Corolla",
+        color="red",
         orientation=VehicleOrientation.FRONT,
         timestamp=datetime.now(),
     )
@@ -126,7 +151,6 @@ def test_hash_plate_with_spaces_and_case(db_handler):
     expected_hash = sha256(b"abc 456").digest()  # Stripped and lowercased
 
     assert hashed_obs.plate_hash == expected_hash
-
 
 def test_hash_plate_empty_string(db_handler):
     """
@@ -137,6 +161,9 @@ def test_hash_plate_empty_string(db_handler):
         plate_score=900,
         country_code="US",
         vehicle_type="car",
+        make="Toyota",
+        model="Corolla",
+        color="red",
         orientation=VehicleOrientation.FRONT,
         timestamp=datetime.now(),
     )
@@ -144,7 +171,6 @@ def test_hash_plate_empty_string(db_handler):
     expected_hash = sha256(b"").digest()
 
     assert hashed_obs.plate_hash == expected_hash
-
 
 # --- Tests for check_for_duplicates ---
 def create_hashed_observation(
@@ -156,10 +182,12 @@ def create_hashed_observation(
         plate_score=800,
         country_code="DE",
         vehicle_type="bus",
+        make="Mercedes",
+        model="Citaro",
+        color="yellow",
         orientation=VehicleOrientation.REAR,
         timestamp=timestamp,
     )
-
 
 def test_check_for_duplicates_no_duplicate(db_handler, db):
     """
@@ -175,7 +203,6 @@ def test_check_for_duplicates_no_duplicate(db_handler, db):
 
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
-
 
 def test_check_for_duplicates_exact_duplicate_within_window(db_handler, db):
     """
@@ -194,7 +221,6 @@ def test_check_for_duplicates_exact_duplicate_within_window(db_handler, db):
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert is_duplicate
 
-
 def test_check_for_duplicates_duplicate_outside_window_older(db_handler, db):
     """
     Test no duplicate found when a matching observation exists but is older than 1 minute.
@@ -211,7 +237,6 @@ def test_check_for_duplicates_duplicate_outside_window_older(db_handler, db):
 
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
-
 
 def test_check_for_duplicates_duplicate_outside_window_newer(db_handler, db):
     """
@@ -231,7 +256,6 @@ def test_check_for_duplicates_duplicate_outside_window_newer(db_handler, db):
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
 
-
 def test_check_for_duplicates_different_plate_same_time(db_handler, db):
     """
     Test no duplicate found when observations have different plate hashes.
@@ -247,7 +271,6 @@ def test_check_for_duplicates_different_plate_same_time(db_handler, db):
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
 
-
 # --- Tests for create_observation_entry ---
 def test_create_observation_entry_successful(db_handler, db):
     """
@@ -258,6 +281,9 @@ def test_create_observation_entry_successful(db_handler, db):
         plate_score=999,
         country_code="DE",
         vehicle_type="motorcycle",
+        make="BMW",
+        model="R1250",
+        color="black",
         orientation=VehicleOrientation.FRONT,
         timestamp=datetime.now(tz=timezone.utc),
     )
@@ -270,6 +296,9 @@ def test_create_observation_entry_successful(db_handler, db):
     assert created_obs.plate_score == hashed_obs.plate_score
     assert created_obs.country_code == hashed_obs.country_code
     assert created_obs.vehicle_type == hashed_obs.vehicle_type
+    assert created_obs.make == hashed_obs.make
+    assert created_obs.model == hashed_obs.model
+    assert created_obs.color == hashed_obs.color
     assert created_obs.orientation == hashed_obs.orientation
     assert created_obs.timestamp == hashed_obs.timestamp
 

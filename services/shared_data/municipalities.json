@@ -1,0 +1,356 @@
+{
+  "Austria": {
+    "Burgenland": [
+      {
+        "E": "Eisenstadt-Stadt"
+      },
+      {
+        "EU": "Eisenstadt/Umgebung"
+      },
+      {
+        "GS": "Güssing"
+      },
+      {
+        "JE": "Jennersdorf"
+      },
+      {
+        "MA": "Mattersburg"
+      },
+      {
+        "ND": "Neusiedl am See"
+      },
+      {
+        "OP": "Oberpullendorf"
+      },
+      {
+        "OW": "Oberwart"
+      }
+    ],
+    "Kärnten": [
+      {
+        "FE": "Feldkirchen"
+      },
+      {
+        "HE": "Hermagor"
+      },
+      {
+        "K": "Klagenfurt-Stadt"
+      },
+      {
+        "KL": "Klagenfurt/Land"
+      },
+      {
+        "SP": "Spittal an der Drau"
+      },
+      {
+        "SV": "St. Veit an der Glan"
+      },
+      {
+        "VI": "Villach"
+      },
+      {
+        "VK": "Völkermarkt"
+      },
+      {
+        "VL": "Villach/Land"
+      },
+      {
+        "WO": "Wolfsberg"
+      }
+    ],
+    "Niederösterreich": [
+      {
+        "AM": "Amstetten"
+      },
+      {
+        "BL": "Bruck an der Leitha"
+      },
+      {
+        "BN": "Baden"
+      },
+      {
+        "GD": "Gmünd"
+      },
+      {
+        "GF": "Gänserndorf"
+      },
+      {
+        "HL": "Hollabrunn"
+      },
+      {
+        "HO": "Horn"
+      },
+      {
+        "KG": "Klosterneuburg"
+      },
+      {
+        "KO": "Korneuburg"
+      },
+      {
+        "KR": "Krems/Land"
+      },
+      {
+        "KS": "Krems an der Donau-Stadt"
+      },
+      {
+        "LF": "Lilienfeld"
+      },
+      {
+        "MD": "Mödling"
+      },
+      {
+        "ME": "Melk"
+      },
+      {
+        "MI": "Mistelbach"
+      },
+      {
+        "NK": "Neunkirchen"
+      },
+      {
+        "P": "St. Pölten-Stadt"
+      },
+      {
+        "PL": "St. Pölten/Land"
+      },
+      {
+        "SB": "Scheibbs"
+      },
+      {
+        "SW": "Schwechat"
+      },
+      {
+        "TU": "Tulln"
+      },
+      {
+        "WB": "Wiener Neustadt/Land"
+      },
+      {
+        "WN": "Wiener Neustadt-Stadt"
+      },
+      {
+        "WT": "Waidhofen an der Thaya"
+      },
+      {
+        "WY": "Waidhofen an der Ybbs"
+      },
+      {
+        "ZT": "Zwettl"
+      }
+    ],
+    "Oberösterreich": [
+      {
+        "BR": "Braunau"
+      },
+      {
+        "EF": "Eferding"
+      },
+      {
+        "FR": "Freistadt"
+      },
+      {
+        "GM": "Gmunden"
+      },
+      {
+        "GR": "Grieskirchen"
+      },
+      {
+        "KI": "Kirchdorf an der Krems"
+      },
+      {
+        "L": "Linz-Stadt"
+      },
+      {
+        "LL": "Linz/Land"
+      },
+      {
+        "PE": "Perg"
+      },
+      {
+        "RI": "Ried im Innkreis"
+      },
+      {
+        "RO": "Rohrbach"
+      },
+      {
+        "SD": "Schärding"
+      },
+      {
+        "SE": "Steyr/Land"
+      },
+      {
+        "SR": "Steyr-Stadt"
+      },
+      {
+        "UU": "Urfahr/Umgebung"
+      },
+      {
+        "VB": "Vöcklabruck"
+      },
+      {
+        "WE": "Wels-Stadt"
+      },
+      {
+        "WL": "Wels/Land"
+      }
+    ],
+    "Salzburg": [
+      {
+        "HA": "Hallein"
+      },
+      {
+        "JO": "St. Johann im Pongau"
+      },
+      {
+        "S": "Salzburg-Stadt"
+      },
+      {
+        "SL": "Salzburg/Land"
+      },
+      {
+        "TA": "Tamsweg"
+      },
+      {
+        "ZE": "Zell am See"
+      }
+    ],
+    "Steiermark": [
+      {
+        "FB": "Feldbach (OLD)"
+      },
+      {
+        "BA": "Bad Aussee, Altaussee, Grundlsee und Bad Mitterndorf"
+      },
+      {
+        "BM": "Bruck-Mürzzuschlag"
+      },
+      {
+        "DL": "Deutschlandsberg"
+      },
+      {
+        "G": "Graz"
+      },
+      {
+        "GB": "Gröbming"
+      },
+      {
+        "GU": "Graz/Umgebung"
+      },
+      {
+        "HF": "Hartberg-Fürstenfeld"
+      },
+      {
+        "LB": "Leibnitz"
+      },
+      {
+        "LE": "Leoben-Stadt"
+      },
+      {
+        "LI": "Liezen"
+      },
+      {
+        "LN": "Leoben"
+      },
+      {
+        "MT": "Murtal"
+      },
+      {
+        "MU": "Murau"
+      },
+      {
+        "SO": "Südoststeiermark"
+      },
+      {
+        "VO": "Voitsberg"
+      },
+      {
+        "WZ": "Weiz"
+      }
+    ],
+    "Tirol": [
+      {
+        "I": "Innsbruck-Stadt"
+      },
+      {
+        "IL": "Innsbruck/Land"
+      },
+      {
+        "IM": "Imst"
+      },
+      {
+        "KB": "Kitzbühel"
+      },
+      {
+        "KU": "Kufstein"
+      },
+      {
+        "LA": "Landeck"
+      },
+      {
+        "LZ": "Lienz"
+      },
+      {
+        "RE": "Reutte"
+      },
+      {
+        "SZ": "Schwaz"
+      }
+    ],
+    "Vorarlberg": [
+      {
+        "B": "Bregenz"
+      },
+      {
+        "BZ": "Bludenz"
+      },
+      {
+        "DO": "Dornbirn"
+      },
+      {
+        "FK": "Feldkirch"
+      }
+    ],
+    "Wien": [
+      {
+        "W": "Wien"
+      }
+    ]
+  },
+  "Slovenia": {
+    "Municipalities": [
+      {
+        "CE": "Celje"
+      },
+      {
+        "GO": "Nova Gorica"
+      },
+      {
+        "KK": "Krško"
+      },
+      {
+        "KP": "Koper"
+      },
+      {
+        "KR": "Kranj"
+      },
+      {
+        "LJ": "Ljubljana"
+      },
+      {
+        "MB": "Maribor"
+      },
+      {
+        "MS": "Murska Sobota"
+      },
+      {
+        "NM": "Novo Mesto"
+      },
+      {
+        "PO": "Postojna"
+      },
+      {
+        "SG": "Slovenj Gradec"
+      }
+    ]
+  }
+}
