@@ -1,11 +1,12 @@
 import smtplib
 import os
 from email.mime.text import MIMEText
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 
 from src.api.router import api_router
+from src.logger import logger
 
 
 def cstm_generate_unique_id(route: APIRoute) -> str:
@@ -19,6 +20,19 @@ app = FastAPI(
 )
 
 app.include_router(api_router, prefix="/api")
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Custom exception handler to log all HTTPExceptions before returning the response"""
+    logger.error(
+        f"HTTP Exception: {exc.status_code} - {exc.detail} for url: {request.url}"
+    )
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+    )
+
 
 
 """ def main():

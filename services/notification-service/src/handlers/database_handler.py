@@ -30,7 +30,7 @@ def get_entry(db: Session, entry_id: int) -> UserPreferences | None:
         stmt = select(UserPreferences).where(UserPreferences.id == entry_id)
         return db.execute(stmt).scalar_one_or_none()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError("Failed to fetch user preferences") from e
+        raise DatabaseQueryError(f"Failed to fetch user preferences: {e}") from e
 
 
 def get_entry_by_name(db: Session, name: str) -> UserPreferences | None:
@@ -47,11 +47,30 @@ def get_entry_by_name(db: Session, name: str) -> UserPreferences | None:
         UserPreferences | None: returns entry object or None
     """
     try:
-        normalized_name = name.lower()
-        stmt = select(UserPreferences).where(UserPreferences.name == normalized_name)
+        stmt = select(UserPreferences).where(UserPreferences.name == name)
         return db.execute(stmt).scalar_one_or_none()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError("Failed to fetch user preferences") from e
+        raise DatabaseQueryError(f"Failed to fetch user preferences: {e}") from e
+
+
+def get_entry_by_email(db: Session, email: str) -> UserPreferences | None:
+    """Retrieve an entry by its email
+
+    Args:
+        db (Session): db session
+        email (str): email of the user the entry is for
+
+    Raises:
+        DatabaseQueryError: raised if the query fails
+
+    Returns:
+        UserPreferences | None: returns entry object or None
+    """
+    try:
+        stmt = select(UserPreferences).where(UserPreferences.email == email)
+        return db.execute(stmt).scalar_one_or_none()
+    except SQLAlchemyError as e:
+        raise DatabaseQueryError(f"Failed to fetch user preferences: {e}") from e
 
 
 def get_entries(db: Session) -> list[UserPreferences]:
@@ -70,7 +89,7 @@ def get_entries(db: Session) -> list[UserPreferences]:
         stmt = select(UserPreferences)
         return db.execute(stmt).scalars().all()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError("Failed to fetch preferences for all users") from e
+        raise DatabaseQueryError(f"Failed to fetch preferences for all users: {e}") from e
 
 
 def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferences:
@@ -87,7 +106,15 @@ def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferenc
     Returns:
         UserPreferences: returns the added object
     """
+    entry.name = str(entry.name).lower()
+    entry.email = str(entry.email).lower()
+
     if get_entry_by_name(db=db, name=entry.name):
+        raise DuplicateEntryError(
+            "An entry with the same name already exists in the database"
+        )
+
+    if get_entry_by_email(db=db, email=entry.email):
         raise DuplicateEntryError(
             "An entry with the same name already exists in the database"
         )
@@ -105,7 +132,7 @@ def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferenc
         return db_entry
     except SQLAlchemyError as e:
         db.rollback()
-        raise DatabaseIntegrityError("Failed to add new user entry") from e
+        raise DatabaseIntegrityError(f"Failed to add new user entry: {e}") from e
 
 
 def update_entry(
@@ -129,7 +156,15 @@ def update_entry(
     if not db_entry:
         raise MissingEntryError("No entry with the specified id found")
 
+    entry.name = str(entry.name).lower()
+    entry.email = str(entry.email).lower()
+
     if get_entry_by_name(db=db, name=entry.name) and db_entry.name != entry.name:
+        raise DuplicateEntryError(
+            "An entry with the same name already exists in the database"
+        )
+
+    if get_entry_by_email(db=db, email=entry.email) and db_entry.email != entry.email:
         raise DuplicateEntryError(
             "An entry with the same name already exists in the database"
         )
@@ -145,4 +180,4 @@ def update_entry(
         return db_entry
     except SQLAlchemyError as e:
         db.rollback()
-        raise DatabaseIntegrityError("Failed to update user entry") from e
+        raise DatabaseIntegrityError(f"Failed to update user entry: {e}") from e

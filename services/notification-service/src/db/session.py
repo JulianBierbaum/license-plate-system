@@ -11,7 +11,6 @@ from src.config import settings
 engine = create_engine(str(settings.db_uri))
 
 
-@contextmanager
 def get_db() -> Generator[Session, None, None]:
     """
     Dependency that provides a SQLAlchemy session.

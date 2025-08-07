@@ -35,7 +35,7 @@ def create_user_preferences(db: SessionDep, entry: schemas.UserPreferencesCreate
     except DatabaseIntegrityError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Database integrity error: {str(e)}",
+            detail=f"Database integrity error: {e}",
         )
 
 
@@ -145,5 +145,5 @@ def update_user_preferences(
     except DatabaseIntegrityError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Database integrity error: {str(e)}",
+            detail=f"Database integrity error: {e}",
         )

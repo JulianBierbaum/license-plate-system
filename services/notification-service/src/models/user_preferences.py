@@ -49,6 +49,6 @@ class UserPreferences(NotificationBase):
     )
     updated_at = Column(
         DateTime(timezone=True),
-        nullable=False,
+        nullable=True,
         server_onupdate=func.now(),
     )
