@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Settings for the Data Collection Service"""
+    """Settings for the Notification Service"""
 
     # Database settings
     db_user: str = Field(..., env="DB_USER")
@@ -11,15 +11,13 @@ class Settings(BaseSettings):
     db_host: str = Field(..., env="DB_HOST")
     db_port: int = Field(..., env="DB_PORT")
     db_name: str = Field(..., env="DB_NAME")
-    data_collection_schema: str = Field(..., env="DATA_COLLECTION_SCHEMA")
+    notification_schema: str = Field(..., env="NOTIFICATION_SCHEMA")
 
     # Service-specific settings
     log_level: str = Field("INFO", env="LOG_LEVEL")
-    synology_host: str = Field(..., env="SYNOLOGY_HOST")
-    synology_username: str = Field(..., env="SYNOLOGY_USERNAME")
-    synology_password: str = Field(..., env="SYNOLOGY_PASSWORD")
-    api_key: str = Field(..., env="API_KEY")
-    save_images_for_debug: str = Field(..., env="SAVE_IMAGES_FOR_DEBUG")
+    analytics_service_url: str = Field(..., env="ANALYTICS_SERVICE_URL")
+    sender_address: str = Field(..., env="SENDER_ADDRESS")
+    app_password: str = Field(..., env="APP_PASSWORD")
 
     @property
     def db_uri(self) -> PostgresDsn:

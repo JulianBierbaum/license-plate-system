@@ -3,14 +3,14 @@ from datetime import datetime
 import pytest
 
 from src.enums.vehicle_orientation import VehicleOrientation
-from src.handlers.country_fix_handler import CountryFixHandler
+from src.handlers.country_handler import CountryHandler
 from src.schemas.vehicle_observation import VehicleObservationRaw
 
 
 class TestCountryFixHandler:
     @pytest.fixture
     def handler(self):
-        return CountryFixHandler()
+        return CountryHandler()
 
     @pytest.mark.parametrize(
         "plate, expected_country_code",
@@ -41,6 +41,9 @@ class TestCountryFixHandler:
             plate_score=90,
             country_code=None,
             vehicle_type="car",
+            make="Toyota",
+            model="Corolla",
+            color="red",
             orientation=VehicleOrientation.FRONT,
             timestamp=datetime.now(),
         )
@@ -62,6 +65,9 @@ class TestCountryFixHandler:
             plate_score=90,
             country_code="si",
             vehicle_type="car",
+            make="Toyota",
+            model="Corolla",
+            color="red",
             orientation=VehicleOrientation.FRONT,
             timestamp=datetime.now(),
         )
@@ -74,6 +80,9 @@ class TestCountryFixHandler:
             plate_score=90,
             country_code="de",
             vehicle_type="car",
+            make="Toyota",
+            model="Corolla",
+            color="red",
             orientation=VehicleOrientation.FRONT,
             timestamp=datetime.now(),
         )

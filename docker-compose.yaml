@@ -9,8 +9,10 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${ANALYTICS_DB_USER}
       DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      ANALYTICS_SCHEMA: ${ANALYTICS_SCHEMA}
+      LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
-      db-migrator:
+      db-prestart:
         condition: service_completed_successfully
 
   auth-service:
@@ -19,28 +21,33 @@ services:
       - "5002:5000"
     environment:
       ACTIVE_DIRECTORY_URL: ${ACTIVE_DIRECTORY_URL}
+      LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
-      db-migrator:
+      db-prestart:
         condition: service_completed_successfully
 
   data-collection-service:
     image: julianbierbaum/license-plate-system:data-collection-service
     ports:
       - "5003:5000"
+    volumes:
+      - ${SAVE_DIR}:/app/snapshots:rw
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
       DB_NAME: ${DB_NAME}
       DB_USER: ${DATA_COLLECTION_DB_USER}
       DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
+      DATA_COLLECTION_SCHEMA: ${DATA_COLLECTION_SCHEMA}
       LOG_LEVEL: ${LOG_LEVEL}
       SYNOLOGY_HOST: ${SYNOLOGY_HOST}
       SYNOLOGY_USERNAME: ${SYNOLOGY_USERNAME}
       SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
+      SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
     depends_on:
-      db-migrator:
-        condition: service_completed_successfully
+      plate-recognizer:
+        condition: service_healthy
 
   notification-service:
     image: julianbierbaum/license-plate-system:notification-service
@@ -52,9 +59,13 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${NOTIFICATION_DB_USER}
       DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      NOTIFICATION_SCHEMA: ${NOTIFICATION_SCHEMA}
+      LOG_LEVEL: ${LOG_LEVEL}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
+      SENDER_ADDRESS: ${SENDER_ADDRESS}
+      APP_PASSWORD: ${APP_PASSWORD}
     depends_on:
-      db-migrator:
+      db-prestart:
         condition: service_completed_successfully
 
   web-service:
@@ -66,13 +77,30 @@ services:
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
       NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
     depends_on:
-      db-migrator:
+      db-prestart:
         condition: service_completed_successfully
 
-  db-migrator:
-    image: julianbierbaum/license-plate-system:db-migrator
+  plate-recognizer:
+    image: platerecognizer/alpr:latest
     volumes:
-      - ./db/alembic/versions:/app/alembic/versions
+      - license:/license
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY}
+      TOKEN: ${PLATE_RECOGNIZER_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  db-prestart:
+    image: julianbierbaum/license-plate-system:db-prestart
+    volumes:
+      - ./db/alembic/versions:/app/alembic/versions:rw
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
@@ -82,6 +110,9 @@ services:
       ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
       DATA_COLLECTION_DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
       NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      DATA_COLLECTION_SCHEMA: ${DATA_COLLECTION_SCHEMA}
+      ANALYTICS_SCHEMA: ${ANALYTICS_SCHEMA}
+      NOTIFICATION_SCHEMA: ${NOTIFICATION_SCHEMA}
     depends_on:
       postgres:
         condition: service_healthy
@@ -105,3 +136,4 @@ services:
 
 volumes:
   postgres_data:
+  license:

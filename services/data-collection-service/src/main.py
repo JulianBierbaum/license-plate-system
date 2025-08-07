@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
@@ -17,7 +18,7 @@ from src.exceptions.database_exceptions import (
 )
 from src.exceptions.plate_recognizer_exceptions import PlateRecognizerCallError
 from src.handlers.camera_handler import CameraHandler
-from src.handlers.country_fix_handler import CountryFixHandler
+from src.handlers.country_handler import CountryHandler
 from src.handlers.database_handler import DatabaseHandler
 from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
 from src.logger import logger
@@ -27,9 +28,11 @@ app = FastAPI()
 camera_service = CameraHandler()
 plate_service = PlateRecognizerHandler()
 db_handler = DatabaseHandler()
-country_fix_handler = CountryFixHandler()
+country_handler = CountryHandler()
 
 basic_auth = HTTPBasic()
+
+os.makedirs("/app/snapshots", exist_ok=True)
 
 
 @app.exception_handler(HTTPException)
@@ -109,7 +112,20 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
             )
 
             image_data = frame.content
-            result = plate_service.send_to_api(image_data=image_data)
+            filename = f"observation_{detection_time}.jpg"
+            filepath = os.path.join("/app/snapshots", filename)
+
+            if settings.save_images_for_debug:
+                try:
+                    with open(filepath, "wb") as f:
+                        f.write(image_data)
+                    logger.info(f"Snapshot saved to {filepath}")
+                except Exception as e:
+                    logger.exception(f"Failed to save image: {e}")
+
+            result = plate_service.send_to_api(
+                image_data=image_data, camera_name=camera_name
+            )
             if not result:
                 logger.info("Plate Recognizer returned no actual observations")
                 return
@@ -121,10 +137,9 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
             )
 
             for observation_data in observations_to_create:
-                if observation_data.country_code == "unknown":
-                    observation_data = country_fix_handler.fix_slovenian_plates(
-                        observation=observation_data
-                    )
+                observation_data = country_handler.get_municipality_and_fix_country(
+                    observation=observation_data
+                )
 
                 observation_data = db_handler.hash_plate(observation=observation_data)
 

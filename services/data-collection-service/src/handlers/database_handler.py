@@ -2,8 +2,8 @@ from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Any
 
-from sqlalchemy import and_
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy import and_, select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from src.enums.vehicle_orientation import VehicleOrientation
@@ -47,8 +47,14 @@ class DatabaseHandler:
                     plate=observation.get("plate", ""),
                     plate_score=int(observation["candidates"][0]["score"] * 1000),
                     country_code=observation.get("region", {}).get("code", ""),
+                    municipality=None,
                     vehicle_type=observation.get("vehicle", {}).get("type", ""),
-                    orientation=VehicleOrientation.FRONT,
+                    make=observation["model_make"][0]["make"],
+                    model=observation["model_make"][0]["model"],
+                    color=observation["color"][0]["color"],
+                    orientation=VehicleOrientation(
+                        observation["orientation"][0]["orientation"].lower()
+                    ),
                     timestamp=detection_timestamp,
                 )
                 _observation_list.append(data)
@@ -79,21 +85,20 @@ class DatabaseHandler:
         """
         try:
             one_minute_before_detection = current_detection_time - timedelta(minutes=1)
-            duplicate_observation = (
-                db.query(VehicleObservation)
-                .filter(
-                    and_(
-                        VehicleObservation.plate_hash == observation.plate_hash,
-                        VehicleObservation.timestamp >= one_minute_before_detection,
-                        VehicleObservation.timestamp
-                        <= current_detection_time,  # If the entry is in the future for sume reason
-                    )
+            stmt = select(
+                VehicleObservation
+            ).where(
+                and_(
+                    VehicleObservation.plate_hash == observation.plate_hash,
+                    VehicleObservation.timestamp >= one_minute_before_detection,
+                    VehicleObservation.timestamp
+                    <= current_detection_time,  # If the entry is in the future for sume reason
                 )
-                .first()
             )
+            duplicate_observation = db.execute(stmt).scalars().first()
             return duplicate_observation is not None
         except SQLAlchemyError as e:
-            raise DatabaseQueryError("Error while checking for duplicates.") from e
+            raise DatabaseQueryError("Error while checking for duplicates") from e
 
     def hash_plate(
         self, observation: VehicleObservationRaw
@@ -113,7 +118,11 @@ class DatabaseHandler:
             plate_hash=sha256(normalized.encode("utf-8")).digest(),
             plate_score=observation.plate_score,
             country_code=observation.country_code,
+            municipality=observation.municipality,
             vehicle_type=observation.vehicle_type,
+            make=observation.make,
+            model=observation.model,
+            color=observation.color,
             orientation=observation.orientation,
             timestamp=observation.timestamp,
         )
@@ -137,7 +146,11 @@ class DatabaseHandler:
             plate_hash=observation.plate_hash,
             plate_score=observation.plate_score,
             country_code=observation.country_code,
+            municipality=observation.municipality,
             vehicle_type=observation.vehicle_type,
+            make=observation.make,
+            model=observation.model,
+            color=observation.color,
             orientation=observation.orientation,
             timestamp=observation.timestamp,
         )
@@ -150,13 +163,15 @@ class DatabaseHandler:
             logger.info(
                 f"Observation saved. ID: {db_observation.id}, "
                 f"Timestamp: {db_observation.timestamp}, "
-                f"Plate Hash: {db_observation.plate_hash.hex()}, "
-                f"Region: {db_observation.country_code}, "
+                f"Plate Hash: {db_observation.plate_hash.hex()} Conf.: {db_observation.plate_score}, "
+                f"Country: {db_observation.country_code}, "
+                f"Municipality: {db_observation.municipality or '-'}, "
                 f"Vehicle Type: {db_observation.vehicle_type}, "
+                f"Make: {db_observation.make}, "
+                f"Model: {db_observation.model}, "
+                f"Color: {db_observation.color}, "
                 f"Orientation: {db_observation.orientation.value}"
             )
             return db_observation
-        except IntegrityError as e:
-            raise DatabaseIntegrityError(
-                "Duplicate entry or integrity violation."
-            ) from e
+        except SQLAlchemyError as e:
+            raise DatabaseIntegrityError("Insertion into database failed") from e
