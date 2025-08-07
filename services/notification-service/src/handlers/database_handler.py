@@ -95,8 +95,8 @@ def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferenc
     db_entry = UserPreferences(
         name=entry.name,
         email=entry.email,
-        recceive_alerts=entry.receive_alerts,
-        receive_updated=entry.receive_updates,
+        receive_alerts=entry.receive_alerts,
+        receive_updates=entry.receive_updates,
     )
     try:
         db.add(db_entry)
