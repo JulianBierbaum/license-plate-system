@@ -6,4 +6,4 @@ License plate recognition system for Zotter Schokoladen GmbH
 - run `docker compose up` to start the development stack
 
 **Add new Alembic Revision:**
-- `docker compose run --rm db-migrator alembic revision --autogenerate -m "text"`
+- `docker compose run --rm db-prestart alembic revision --autogenerate -m "text"`

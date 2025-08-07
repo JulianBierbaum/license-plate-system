@@ -17,9 +17,14 @@ while getopts ":p" opt; do
 done
 
 (cd db && uv sync)
-docker build -t "${REPO}:db-migrator" -f ./db/Dockerfile .
+docker build -t "${REPO}:db-prestart" -f ./db/Dockerfile .
 if [ "$PUSH" = true ]; then
-  docker push "${REPO}:db-migrator"
+  docker push "${REPO}:db-prestart"
+fi
+
+docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data
+if [ "$PUSH" = true ]; then
+  docker push "${REPO}:shared-data"
 fi
 
 for SERVICE_DIR in services/*/; do

@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     synology_username: str = Field(..., env="SYNOLOGY_USERNAME")
     synology_password: str = Field(..., env="SYNOLOGY_PASSWORD")
     api_key: str = Field(..., env="API_KEY")
+    save_images_for_debug: str = Field(..., env="SAVE_IMAGES_FOR_DEBUG")
 
     @property
     def db_uri(self) -> PostgresDsn:

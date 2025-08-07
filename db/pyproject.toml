@@ -1,5 +1,5 @@
 [project]
-name = "db-migrator"
+name = "db-prestart"
 version = "0.1.0"
 description = "Database migration service"
 requires-python = ">=3.11"

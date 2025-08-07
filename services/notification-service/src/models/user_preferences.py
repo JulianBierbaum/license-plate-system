@@ -1,7 +1,7 @@
 from sqlalchemy import Column, DateTime, Integer, String, Boolean, text
 from sqlalchemy.sql import func
 
-# relative imports needed for db-migrator service
+# relative imports needed for db-prestart service
 from ..models.base import NotificationBase
 
 

@@ -11,10 +11,12 @@ from src.schemas.vehicle_observation import (
     VehicleObservationRaw,
 )
 
+
 @pytest.fixture
 def db_handler():
     """Fixture for DatabaseHandler instance."""
     return DatabaseHandler()
+
 
 # --- Tests for new_observation ---
 def test_new_observation_successful_extraction(db_handler):
@@ -50,6 +52,7 @@ def test_new_observation_successful_extraction(db_handler):
     assert obs.orientation == VehicleOrientation.FRONT
     assert obs.timestamp == detection_timestamp
 
+
 def test_new_observation_empty_results(db_handler):
     """
     Test when reader_result has an empty 'results' list.
@@ -59,6 +62,7 @@ def test_new_observation_empty_results(db_handler):
 
     observations = db_handler.new_observation(reader_result, detection_timestamp)
     assert len(observations) == 0
+
 
 def test_new_observation_multiple_observations(db_handler):
     """
@@ -103,6 +107,7 @@ def test_new_observation_multiple_observations(db_handler):
     assert obs2.color == "blue"
     assert obs2.orientation == VehicleOrientation.REAR
 
+
 # --- Tests for hash_plate ---
 def test_hash_plate_standard(db_handler):
     """
@@ -132,6 +137,7 @@ def test_hash_plate_standard(db_handler):
     assert hashed_obs.orientation == raw_obs.orientation
     assert hashed_obs.timestamp == raw_obs.timestamp
 
+
 def test_hash_plate_with_spaces_and_case(db_handler):
     """
     Test hashing a plate with leading/trailing spaces and different casing.
@@ -151,6 +157,7 @@ def test_hash_plate_with_spaces_and_case(db_handler):
     expected_hash = sha256(b"abc 456").digest()  # Stripped and lowercased
 
     assert hashed_obs.plate_hash == expected_hash
+
 
 def test_hash_plate_empty_string(db_handler):
     """
@@ -172,6 +179,7 @@ def test_hash_plate_empty_string(db_handler):
 
     assert hashed_obs.plate_hash == expected_hash
 
+
 # --- Tests for check_for_duplicates ---
 def create_hashed_observation(
     plate: str, timestamp: datetime
@@ -189,6 +197,7 @@ def create_hashed_observation(
         timestamp=timestamp,
     )
 
+
 def test_check_for_duplicates_no_duplicate(db_handler, db):
     """
     Test no duplicate found when no matching observation exists.
@@ -203,6 +212,7 @@ def test_check_for_duplicates_no_duplicate(db_handler, db):
 
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
+
 
 def test_check_for_duplicates_exact_duplicate_within_window(db_handler, db):
     """
@@ -221,6 +231,7 @@ def test_check_for_duplicates_exact_duplicate_within_window(db_handler, db):
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert is_duplicate
 
+
 def test_check_for_duplicates_duplicate_outside_window_older(db_handler, db):
     """
     Test no duplicate found when a matching observation exists but is older than 1 minute.
@@ -237,6 +248,7 @@ def test_check_for_duplicates_duplicate_outside_window_older(db_handler, db):
 
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
+
 
 def test_check_for_duplicates_duplicate_outside_window_newer(db_handler, db):
     """
@@ -256,6 +268,7 @@ def test_check_for_duplicates_duplicate_outside_window_newer(db_handler, db):
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
 
+
 def test_check_for_duplicates_different_plate_same_time(db_handler, db):
     """
     Test no duplicate found when observations have different plate hashes.
@@ -270,6 +283,7 @@ def test_check_for_duplicates_different_plate_same_time(db_handler, db):
 
     is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
     assert not is_duplicate
+
 
 # --- Tests for create_observation_entry ---
 def test_create_observation_entry_successful(db_handler, db):

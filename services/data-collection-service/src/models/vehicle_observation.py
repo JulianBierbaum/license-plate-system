@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 
 from ..enums.vehicle_orientation import VehicleOrientation
 
-# relative imports needed for db-migrator service
+# relative imports needed for db-prestart service
 from ..models.base import IngestionBase
 
 

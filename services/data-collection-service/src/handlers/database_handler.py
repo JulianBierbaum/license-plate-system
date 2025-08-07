@@ -52,7 +52,9 @@ class DatabaseHandler:
                     make=observation["model_make"][0]["make"],
                     model=observation["model_make"][0]["model"],
                     color=observation["color"][0]["color"],
-                    orientation=VehicleOrientation(observation["orientation"][0]["orientation"].lower()),
+                    orientation=VehicleOrientation(
+                        observation["orientation"][0]["orientation"].lower()
+                    ),
                     timestamp=detection_timestamp,
                 )
                 _observation_list.append(data)
@@ -161,9 +163,9 @@ class DatabaseHandler:
             logger.info(
                 f"Observation saved. ID: {db_observation.id}, "
                 f"Timestamp: {db_observation.timestamp}, "
-                f"Plate Hash: {db_observation.plate_hash.hex()}, "
+                f"Plate Hash: {db_observation.plate_hash.hex()} Conf.: {db_observation.plate_score}, "
                 f"Country: {db_observation.country_code}, "
-                f"Municipality: {db_observation.municipality or "-"}, "
+                f"Municipality: {db_observation.municipality or '-'}, "
                 f"Vehicle Type: {db_observation.vehicle_type}, "
                 f"Make: {db_observation.make}, "
                 f"Model: {db_observation.model}, "
