@@ -41,7 +41,7 @@ class PlateRecognizerHandler:
                 'http://plate-recognizer:8080/v1/plate-reader/',
                 data={
                     'camera_id': camera_name,
-                    'regions': ['at', 'hu', 'si'],
+                    'regions': ['at', 'hu', 'si', 'de'],
                     'mmc': 'true',
                     'direction': 'true',
                 },
