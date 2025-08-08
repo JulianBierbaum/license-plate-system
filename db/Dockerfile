@@ -21,8 +21,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 COPY /db /app
 
 COPY services/data-collection-service/src/ /app/data_collection/src/
+COPY services/notification-service/src/ /app/notification/src/
 # COPY services/analytics-service/src/ /app/analytics/src/
-# COPY services/notification-service/src/ /app/notification/src/
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev

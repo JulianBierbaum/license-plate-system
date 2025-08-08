@@ -1,31 +1,36 @@
-import os
-
-from pydantic import PostgresDsn
-from pydantic_core import MultiHostUrl
+from pydantic import Field, PostgresDsn
+from pydantic_settings import BaseSettings
 
 
-class Settings:
-    """settings class"""
+class Settings(BaseSettings):
+    """Settings for the Data Collection Service"""
 
-    db_user: str = os.getenv("DB_USER", "")
-    db_password: str = os.getenv("DB_PASSWORD", "")
-    db_host: str = os.getenv("DB_HOST", "")
-    db_port: str = os.getenv("DB_PORT", "")
-    db_name: str = os.getenv("DB_NAME", "")
-    log_level: str = os.getenv("LOG_LEVEL", "").upper()
-    synology_host: str = os.getenv("SYNOLOGY_HOST", "")
-    synology_username: str = os.getenv("SYNOLOGY_USERNAME", "")
-    synology_password: str = os.getenv("SYNOLOGY_PASSWORD", "")
-    api_key: str = os.getenv("API_KEY", "")
+    # Database settings
+    db_user: str = Field(..., alias='DB_USER')
+    db_password: str = Field(..., alias='DB_PASSWORD')
+    db_host: str = Field(..., alias='DB_HOST')
+    db_port: int = Field(..., alias='DB_PORT')
+    db_name: str = Field(..., alias='DB_NAME')
+    data_collection_schema: str = Field(..., alias='DATA_COLLECTION_SCHEMA')
+
+    # Service-specific settings
+    log_level: str = Field('INFO', alias='LOG_LEVEL')
+    synology_host: str = Field(..., alias='SYNOLOGY_HOST')
+    synology_username: str = Field(..., alias='SYNOLOGY_USERNAME')
+    synology_password: str = Field(..., alias='SYNOLOGY_PASSWORD')
+    api_key: str = Field(..., alias='API_KEY')
+    save_images_for_debug: bool = Field(False, alias='SAVE_IMAGES_FOR_DEBUG')
+    interval_seconds: int = Field(60, alias='INTERVAL_SECONDS')
 
     @property
     def db_uri(self) -> PostgresDsn:
-        return MultiHostUrl.build(
-            scheme="postgresql+psycopg2",
+        """Constructs the PostgreSQL connection URI."""
+        return PostgresDsn.build(
+            scheme='postgresql+psycopg2',
             username=self.db_user,
             password=self.db_password,
             host=self.db_host,
-            port=int(self.db_port),
+            port=self.db_port,
             path=self.db_name,
         )
 
