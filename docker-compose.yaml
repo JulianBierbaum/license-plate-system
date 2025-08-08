@@ -45,6 +45,7 @@ services:
       SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
       SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
+      INTERVAL_SECONDS: ${INTERVAL_SECONDS}
     depends_on:
       plate-recognizer:
         condition: service_healthy

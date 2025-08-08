@@ -10,3 +10,24 @@ dependencies = [
     "pydantic-settings>=2.10.1",
     "sqlalchemy>=2.0.41",
 ]
+
+[tool.ruff]
+target-version = "py310"
+exclude = [".venv", "*.pyi"]
+src = ["app", "tests"]
+line-length = 120
+indent-width = 4
+
+[tool.ruff.lint]
+select = ["E", "F", "UP", "W"]
+
+[tool.ruff.format]
+quote-style = "single"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+pythonpath = ["."]
+
