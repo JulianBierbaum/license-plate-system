@@ -20,8 +20,13 @@ services:
     ports:
       - "5002:5000"
     environment:
-      ACTIVE_DIRECTORY_URL: ${ACTIVE_DIRECTORY_URL}
       LOG_LEVEL: ${LOG_LEVEL}
+      DOMAIN_NAME: ${DOMAIN_NAME}
+      DOMAIN_LOCAL: ${DOMAIN_LOCAL}
+      AD_USERNAME: ${AD_USERNAME}
+      PASSWORD: ${PASSWORD}
+      SERVER_IP: ${SERVER_IP}
+      SECRET_KEY: ${SECRET_KEY}
     depends_on:
       db-prestart:
         condition: service_completed_successfully
@@ -72,7 +77,7 @@ services:
   web-service:
     image: julianbierbaum/license-plate-system:web-service
     ports:
-      - "3000:3000"
+      - "3001:3000"
     environment:
       AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
