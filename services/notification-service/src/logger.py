@@ -8,4 +8,4 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 
-logger = logging.getLogger("data-collection-service")
+logger = logging.getLogger("notification-service")
