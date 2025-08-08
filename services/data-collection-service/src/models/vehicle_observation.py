@@ -15,7 +15,7 @@ class VehicleObservation(IngestionBase):
         IngestionBase (postgres schema): base for the ingestion schema
     """
 
-    __tablename__ = "vehicle_observations"
+    __tablename__ = 'vehicle_observations'
 
     id = Column(
         Integer,
@@ -62,6 +62,6 @@ class VehicleObservation(IngestionBase):
         nullable=True,
     )
     orientation = Column(
-        ENUM(VehicleOrientation, name="vehicle_orientation"),
+        ENUM(VehicleOrientation, name='vehicle_orientation'),
         nullable=True,
     )

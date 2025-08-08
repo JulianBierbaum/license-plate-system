@@ -11,20 +11,20 @@ from src.schemas.vehicle_observation import VehicleObservationRaw
 def handler():
     """Create a CountryHandler with minimal test data for Austria and Slovenia."""
     data = {
-        "Austria": {
-            "Burgenland": [
-                {"E": "Eisenstadt-Stadt"},
-                {"EU": "Eisenstadt/Umgebung"},
+        'Austria': {
+            'Burgenland': [
+                {'E': 'Eisenstadt-Stadt'},
+                {'EU': 'Eisenstadt/Umgebung'},
             ],
-            "Kärnten": [
-                {"K": "Klagenfurt-Stadt"},
-                {"KL": "Klagenfurt/Land"},
+            'Kärnten': [
+                {'K': 'Klagenfurt-Stadt'},
+                {'KL': 'Klagenfurt/Land'},
             ],
         },
-        "Slovenia": {
-            "Municipalities": [
-                {"CE": "Celje"},
-                {"LJ": "Ljubljana"},
+        'Slovenia': {
+            'Municipalities': [
+                {'CE': 'Celje'},
+                {'LJ': 'Ljubljana'},
             ]
         },
     }
@@ -37,10 +37,10 @@ def make_observation(plate: str, country_code: str | None):
         plate=plate,
         plate_score=90,
         country_code=country_code,
-        vehicle_type="car",
-        make="Toyota",
-        model="Corolla",
-        color="red",
+        vehicle_type='car',
+        make='Toyota',
+        model='Corolla',
+        color='red',
         orientation=VehicleOrientation.FRONT,
         timestamp=datetime.now(),
     )
@@ -48,13 +48,13 @@ def make_observation(plate: str, country_code: str | None):
 
 class TestCountryHandler:
     @pytest.mark.parametrize(
-        "plate, initial_country, expected_country, expected_municipality",
+        'plate, initial_country, expected_country, expected_municipality',
         [
-            ("CE123AB", "unknown", "si", "CE"),
-            ("lj999xx", "unknown", "si", "LJ"),
-            ("CE123AB", "si", "si", "CE"),
-            ("LJ456CD", "de", "de", None),
-            ("XX123YY", "unknown", "unknown", None),
+            ('CE123AB', 'unknown', 'si', 'CE'),
+            ('lj999xx', 'unknown', 'si', 'LJ'),
+            ('CE123AB', 'si', 'si', 'CE'),
+            ('LJ456CD', 'de', 'de', None),
+            ('XX123YY', 'unknown', 'unknown', None),
         ],
     )
     def test_slovenian_lookup(
@@ -71,12 +71,12 @@ class TestCountryHandler:
         assert fixed.municipality == expected_municipality
 
     @pytest.mark.parametrize(
-        "plate, initial_country, expected_country, expected_municipality",
+        'plate, initial_country, expected_country, expected_municipality',
         [
-            ("E123AB", "at", "at", "E"),
-            ("EU456CD", "at", "at", "EU"),
-            ("E123AB", "de", "de", None),
-            ("ZZ999ZZ", "at", "at", None),
+            ('E123AB', 'at', 'at', 'E'),
+            ('EU456CD', 'at', 'at', 'EU'),
+            ('E123AB', 'de', 'de', None),
+            ('ZZ999ZZ', 'at', 'at', None),
         ],
     )
     def test_austrian_lookup(

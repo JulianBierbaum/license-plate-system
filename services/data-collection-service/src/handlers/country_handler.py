@@ -12,34 +12,32 @@ class CountryHandler:
         self.SLOVENIAN_LOOKUP = {}
 
         if data is None:
-            with open("/app/shared-data/municipalities.json", encoding="utf-8") as f:
+            with open('/app/shared-data/municipalities.json', encoding='utf-8') as f:
                 data = json.load(f)
 
         # Process Austria
-        if "Austria" in data:
-            for state_name, municipalities in data["Austria"].items():
+        if 'Austria' in data:
+            for state_name, municipalities in data['Austria'].items():
                 for municipality_dict in municipalities:
                     for code, name in municipality_dict.items():
                         self.AUSTRIAN_LOOKUP[code.upper()] = {
-                            "country": "at",
-                            "state": state_name,
-                            "municipality": name,
+                            'country': 'at',
+                            'state': state_name,
+                            'municipality': name,
                         }
 
         # Process Slovenia
-        if "Slovenia" in data:
-            municipalities = data["Slovenia"]["Municipalities"]
+        if 'Slovenia' in data:
+            municipalities = data['Slovenia']['Municipalities']
             for municipality_dict in municipalities:
                 for code, name in municipality_dict.items():
                     self.SLOVENIAN_LOOKUP[code.upper()] = {
-                        "country": "si",
-                        "state": "Slovenia",
-                        "municipality": name,
+                        'country': 'si',
+                        'state': 'Slovenia',
+                        'municipality': name,
                     }
 
-    def get_municipality_and_fix_country(
-        self, observation: VehicleObservationRaw
-    ) -> VehicleObservationRaw:
+    def get_municipality_and_fix_country(self, observation: VehicleObservationRaw) -> VehicleObservationRaw:
         """
         Get municipality info and fix country code based on current country detection.
 
@@ -55,20 +53,18 @@ class CountryHandler:
             logger.debug(f"Plate '{observation.plate}' too short to be valid")
             return observation
 
-        normalized_country = (observation.country_code or "unknown").lower()
+        normalized_country = (observation.country_code or 'unknown').lower()
 
         # Handle Austrian plates
-        if normalized_country == "at":
+        if normalized_country == 'at':
             return self._check_austrian_municipalities(observation, plate_str)
 
         # Handle unknown or Slovenian plates
-        elif normalized_country in ["unknown", "si"]:
+        elif normalized_country in ['unknown', 'si']:
             return self._check_slovenian_municipalities(observation, plate_str)
 
         # For other countries
-        logger.debug(
-            f"No municipality mapping for country '{observation.country_code}'"
-        )
+        logger.debug(f"No municipality mapping for country '{observation.country_code}'")
         return observation
 
     def _check_austrian_municipalities(
@@ -83,8 +79,8 @@ class CountryHandler:
                 municipality_info = self.AUSTRIAN_LOOKUP[code_2]
                 observation.municipality = code_2
                 logger.debug(
-                    f"Austrian plate mapped to region: "
-                    f"{municipality_info['municipality']}, {municipality_info['state']} (code: {code_2})"
+                    f'Austrian plate mapped to region: '
+                    f'{municipality_info["municipality"]}, {municipality_info["state"]} (code: {code_2})'
                 )
                 return observation
 
@@ -94,8 +90,8 @@ class CountryHandler:
             municipality_info = self.AUSTRIAN_LOOKUP[code_1]
             observation.municipality = code_1
             logger.debug(
-                f"Austrian plate mapped to region: "
-                f"{municipality_info['municipality']}, {municipality_info['state']} (code: {code_1})"
+                f'Austrian plate mapped to region: '
+                f'{municipality_info["municipality"]}, {municipality_info["state"]} (code: {code_1})'
             )
             return observation
 
@@ -115,19 +111,18 @@ class CountryHandler:
                 observation.municipality = code_2
 
                 # Fix country code if it was unknown
-                if observation.country_code == "unknown":
-                    observation.country_code = "si"
+                if observation.country_code == 'unknown':
+                    observation.country_code = 'si'
                     logger.debug(
                         f"Fixed plate country changed to 'si' "
-                        f"(region: {municipality_info['municipality']}, code: {code_2})"
+                        f'(region: {municipality_info["municipality"]}, code: {code_2})'
                     )
                 else:
                     logger.debug(
-                        f"Slovenian plate mapped to region: "
-                        f"{municipality_info['municipality']} (code: {code_2})"
+                        f'Slovenian plate mapped to region: {municipality_info["municipality"]} (code: {code_2})'
                     )
 
                 return observation
 
-        logger.debug("No Slovenian region match found for plate")
+        logger.debug('No Slovenian region match found for plate')
         return observation
