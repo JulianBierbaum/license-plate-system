@@ -6,18 +6,18 @@ class Settings(BaseSettings):
     """Settings for the Notification Service"""
 
     # Database settings
-    db_user: str = Field(..., env="DB_USER")
-    db_password: str = Field(..., env="DB_PASSWORD")
-    db_host: str = Field(..., env="DB_HOST")
-    db_port: int = Field(..., env="DB_PORT")
-    db_name: str = Field(..., env="DB_NAME")
-    notification_schema: str = Field(..., env="NOTIFICATION_SCHEMA")
+    db_user: str = Field(..., alias="DB_USER")
+    db_password: str = Field(..., alias="DB_PASSWORD")
+    db_host: str = Field(..., alias="DB_HOST")
+    db_port: int = Field(..., alias="DB_PORT")
+    db_name: str = Field(..., alias="DB_NAME")
+    notification_schema: str = Field(..., alias="NOTIFICATION_SCHEMA")
 
     # Service-specific settings
-    log_level: str = Field("INFO", env="LOG_LEVEL")
-    analytics_service_url: str = Field(..., env="ANALYTICS_SERVICE_URL")
-    sender_address: str = Field(..., env="SENDER_ADDRESS")
-    app_password: str = Field(..., env="APP_PASSWORD")
+    log_level: str = Field("INFO", alias="LOG_LEVEL")
+    analytics_service_url: str = Field(..., alias="ANALYTICS_SERVICE_URL")
+    sender_address: str = Field(..., alias="SENDER_ADDRESS")
+    app_password: str = Field(..., alias="APP_PASSWORD")
 
     @property
     def db_uri(self) -> PostgresDsn:
