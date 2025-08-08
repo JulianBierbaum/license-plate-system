@@ -3,27 +3,44 @@ set -e
 
 REPO="julianbierbaum/license-plate-system"
 PUSH=false
+SERVICES_TO_BUILD=()
 
-while getopts ":p" opt; do
-  case ${opt} in
-    p )
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -p)
       PUSH=true
+      shift
       ;;
-    \? )
-      echo "Invalid option: -$OPTARG" 1>&2
-      exit 1
+    *)
+      SERVICES_TO_BUILD+=("$1")
+      shift
       ;;
   esac
 done
 
-(cd db && uv sync)
-docker build -t "${REPO}:db-migrator" -f ./db/Dockerfile .
-if [ "$PUSH" = true ]; then
-  docker push "${REPO}:db-migrator"
+if [ ${#SERVICES_TO_BUILD[@]} -eq 0 ]; then
+  SERVICES_TO_BUILD=($(basename -a services/*/))
 fi
 
-for SERVICE_DIR in services/*/; do
-  SERVICE_NAME=$(basename "$SERVICE_DIR")
+(cd db && uv sync)
+docker build -t "${REPO}:db-prestart" -f ./db/Dockerfile .
+if [ "$PUSH" = true ]; then
+  docker push "${REPO}:db-prestart"
+fi
+
+docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data
+if [ "$PUSH" = true ]; then
+  docker push "${REPO}:shared-data"
+fi
+
+for SERVICE_NAME in "${SERVICES_TO_BUILD[@]}"; do
+  SERVICE_DIR="services/${SERVICE_NAME}/"
+  if [ ! -d "$SERVICE_DIR" ]; then
+    echo "Service '$SERVICE_NAME' not found in services/"
+    exit 1
+  fi
+
   if [ -f "${SERVICE_DIR}pyproject.toml" ]; then
     (cd "$SERVICE_DIR" && uv sync)
   fi
@@ -32,7 +49,7 @@ for SERVICE_DIR in services/*/; do
     (cd "$SERVICE_DIR" && npm install)
   fi
 
-  docker build -t "${REPO}:${SERVICE_NAME}" ./"$SERVICE_DIR"
+  docker build -t "${REPO}:${SERVICE_NAME}" "$SERVICE_DIR"
 
   if [ "$PUSH" = true ]; then
     docker push "${REPO}:${SERVICE_NAME}"
