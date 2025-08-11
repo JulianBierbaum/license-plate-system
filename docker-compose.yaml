@@ -20,7 +20,6 @@ services:
     ports:
       - "5002:5000"
     environment:
-      ACTIVE_DIRECTORY_URL: ${ACTIVE_DIRECTORY_URL}
       LOG_LEVEL: ${LOG_LEVEL}
     depends_on:
       db-prestart:
