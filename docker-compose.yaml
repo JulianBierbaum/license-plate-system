@@ -47,8 +47,8 @@ services:
       SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
       INTERVAL_SECONDS: ${INTERVAL_SECONDS}
     depends_on:
-      plate-recognizer:
-        condition: service_healthy
+      db-prestart:
+        condition: service_completed_successfully
 
   notification-service:
     image: julianbierbaum/license-plate-system:notification-service
