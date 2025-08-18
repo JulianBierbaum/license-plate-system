@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Build script for the project services
+# Usage: ./build.sh [-p for pushing to docker registry] [list of service names seperated by spaces]
+
 set -e
 
 REPO="julianbierbaum/license-plate-system"

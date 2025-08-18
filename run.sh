@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Script for running the docker stack and cleaning up on exit
+# Usage: ./run.sh
+
 # Function to be executed on exit
 cleanup() {
     echo "Stopping services and removing volumes..."
