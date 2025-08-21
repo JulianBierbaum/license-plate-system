@@ -4,7 +4,7 @@ from src.config import settings
 
 logging.basicConfig(
     level=settings.log_level,
-    format='%(asctime)s - data-collection-service - %(levelname)s - %(message)s',
+    format="%(asctime)s - notification-service - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()],
 )
 

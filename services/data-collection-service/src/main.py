@@ -32,7 +32,8 @@ country_handler = CountryHandler()
 
 basic_auth = HTTPBasic()
 
-os.makedirs('/app/snapshots', exist_ok=True)
+if settings.save_images_for_debug:
+    os.makedirs('/app/snapshots', exist_ok=True)
 
 
 @app.exception_handler(HTTPException)

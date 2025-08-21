@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Build script for the project services
+# Usage: ./build.sh [-p for pushing to docker registry] [list of service names seperated by spaces]
+
 set -e
 
 REPO="julianbierbaum/license-plate-system"
@@ -27,6 +31,12 @@ fi
 docker build -t "${REPO}:db-prestart" -f ./db/Dockerfile .
 if [ "$PUSH" = true ]; then
   docker push "${REPO}:db-prestart"
+fi
+
+(cd db-backup)
+docker build -t "${REPO}:db-backup" -f ./db-backup/Dockerfile ./db-backup
+if [ "$PUSH" = true ]; then
+  docker push "${REPO}:db-backup"
 fi
 
 docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data

@@ -314,6 +314,14 @@
       {
         "W": "Wien"
       }
+    ],
+    "Special": [
+      {
+        "FW": "Feuerwehr"
+      },
+      {
+        "PT": "Post"
+      }
     ]
   },
   "Slovenia": {
