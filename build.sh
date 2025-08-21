@@ -33,6 +33,12 @@ if [ "$PUSH" = true ]; then
   docker push "${REPO}:db-prestart"
 fi
 
+(cd db-backup)
+docker build -t "${REPO}:db-backup" -f ./db-backup/Dockerfile ./db-backup
+if [ "$PUSH" = true ]; then
+  docker push "${REPO}:db-backup"
+fi
+
 docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data
 if [ "$PUSH" = true ]; then
   docker push "${REPO}:shared-data"
