@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# This script sets up the basic database environment
+
 set -e
 
 echo "Waiting for PostgreSQL to be ready..."
