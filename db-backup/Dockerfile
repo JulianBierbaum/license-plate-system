@@ -3,20 +3,20 @@ FROM postgres:14-alpine
 WORKDIR /
 
 # Copy the backup script
-COPY backup-entrypoint.sh /backup-entrypoint.sh
+COPY backup_entrypoint.sh /backup_entrypoint.sh
+COPY crontab_entrypoint.sh /crontab_entrypoint.sh
 
-# Install dcron AND tini
+# Install dcron and tini
 RUN apk add --no-cache dcron tini
 
-# Create the crontab service to run every day at midnight
-RUN echo '0 0 * * * /backup-entrypoint.sh' > /var/spool/cron/crontabs/root
-RUN chmod +x /backup-entrypoint.sh
+# Make scripts executable
+RUN chmod +x /backup_entrypoint.sh /crontab_entrypoint.sh
 
 # Expose the volume where backups will be stored
 VOLUME /backups
 
-# Set tini as the entrypoint (fix for crond)
+# Use tini as entrypoint (fix for crond)
 ENTRYPOINT ["/sbin/tini", "--"]
 
-# Set the default command to start the cron daemon in the foreground.
-CMD ["crond", "-f", "-l", "8"]
+# Start crontab_entrypoint.sh
+CMD ["/crontab_entrypoint.sh"]

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # PostgreSQL Restore Script for License Plate System
-# Usage: ./restore.sh <path_to_backup_file>
+# Usage: ./restore.sh <PATH_TO_BACKUP_FILE>
 
 set -e
 

@@ -125,7 +125,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT_EXTERN}:5432"
+      - "${DB_PORT_EXTERNAL}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -146,6 +146,7 @@ services:
       DB_USER: ${POSTGRES_ADMIN_USER}
       DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE}
     depends_on:
       db-prestart:
         condition: service_completed_successfully

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Manual PostgreSQL Backup Script for License Plate System
-# Usage: ./backup.sh [backup_name]
+# Usage: ./backup.sh <BACKUP_NAME>
 
 set -e
 
