@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Manual PostgreSQL Backup Script for License Plate System
-# Usage: ./backup.sh [backup_name]
+# Usage: ./backup.sh <BACKUP_NAME>
 
 set -e
 
@@ -31,11 +31,10 @@ fi
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/${DB_NAME}_manual_${TIMESTAMP}.dump"
 
-echo "=== Starting automated backup ==="
+echo "=== Starting manual backup ==="
 echo "Database: $DB_NAME"
 echo "Container: $POSTGRES_CONTAINER"
 echo "Backup file: $BACKUP_FILE"
-echo "Retention: $BACKUP_RETENTION_DAYS day(s)"
 echo "================================="
 
 # Create backup

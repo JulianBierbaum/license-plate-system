@@ -22,8 +22,12 @@ mkdir -p "$BACKUP_DIR"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/${DB_NAME}_automated_${TIMESTAMP}.dump"
 
-echo "Starting automated backup of database: $DB_NAME"
-echo "Host: $DB_HOST:$DB_PORT"
+echo "=== Starting automatied backup ==="
+echo "Database: $DB_NAME"
+echo "Container: $POSTGRES_CONTAINER"
+echo "Backup file: $BACKUP_FILE"
+echo "Retention: $BACKUP_RETENTION_DAYS day(s)"
+echo "================================="
 
 # Wait for PostgreSQL to be ready
 echo "Checking database connectivity..."
