@@ -21,7 +21,7 @@ BACKUP_DIR="${BACKUP_DIR}"
 mkdir -p "$BACKUP_DIR"
 
 # Find running PostgreSQL container
-POSTGRES_CONTAINER=$(docker-compose ps -q postgres)
+POSTGRES_CONTAINER=$(docker compose ps -q postgres)
 if [ -z "$POSTGRES_CONTAINER" ]; then
     echo "Error: PostgreSQL container not found. Is it running?"
     exit 1

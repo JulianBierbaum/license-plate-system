@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # PostgreSQL Restore Script for License Plate System
-# Usage: ./restore.sh <PATH_TO_BACKUP_FILE>
+# Usage: ./restore_backup.sh <PATH_TO_BACKUP_FILE>
 
 set -e
 
@@ -31,9 +31,9 @@ else
 fi
 
 # Find the running PostgreSQL container
-POSTGRES_CONTAINER=$(docker-compose ps -q postgres)
+POSTGRES_CONTAINER=$(docker compose ps -q postgres)
 if [ -z "$POSTGRES_CONTAINER" ]; then
-    echo "Error: PostgreSQL container not found. Is it running? (Hint: docker-compose up -d)"
+    echo "Error: PostgreSQL container not found. Is it running? (Hint: docker compose up -d)"
     exit 1
 fi
 
@@ -53,7 +53,7 @@ fi
 
 echo "Stopping dependent services..."
 
-docker-compose stop analytics-service data-collection-service notification-service postgres-backup
+docker compose stop analytics-service data-collection-service notification-service postgres-backup
 
 sleep 5
 
