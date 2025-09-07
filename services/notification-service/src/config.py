@@ -17,7 +17,6 @@ class Settings(BaseSettings):
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     analytics_service_url: str = Field(..., alias="ANALYTICS_SERVICE_URL")
     sender_address: str = Field(..., alias="SENDER_ADDRESS")
-    app_password: str = Field(..., alias="APP_PASSWORD")
 
     @property
     def db_uri(self) -> PostgresDsn:

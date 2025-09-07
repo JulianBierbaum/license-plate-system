@@ -64,7 +64,6 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
-      APP_PASSWORD: ${APP_PASSWORD}
     depends_on:
       db-prestart:
         condition: service_completed_successfully
