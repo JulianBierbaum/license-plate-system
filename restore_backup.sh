@@ -1,11 +1,9 @@
 #!/bin/bash
 
 # PostgreSQL Restore Script for License Plate System
-# Usage: ./restore.sh <path_to_backup_file>
+# Usage: ./restore_backup.sh <PATH_TO_BACKUP_FILE>
 
 set -e
-
-# --- Configuration & Validation ---
 
 # Check if a backup file path is provided as an argument
 if [ -z "$1" ]; then
@@ -22,7 +20,7 @@ if [ ! -f "$BACKUP_FILE" ]; then
     exit 1
 fi
 
-# Load environment variables from the .env file in the current directory
+# Load environment variables from the .env file
 if [ -f ".env" ]; then
     set -a
     source ".env"
@@ -32,10 +30,10 @@ else
     exit 1
 fi
 
-# Find the running PostgreSQL container using docker-compose
-POSTGRES_CONTAINER=$(docker-compose ps -q postgres)
+# Find the running PostgreSQL container
+POSTGRES_CONTAINER=$(docker compose ps -q postgres)
 if [ -z "$POSTGRES_CONTAINER" ]; then
-    echo "Error: PostgreSQL container not found. Is it running? (Hint: docker-compose up -d)"
+    echo "Error: PostgreSQL container not found. Is it running? (Hint: docker compose up -d)"
     exit 1
 fi
 
@@ -55,7 +53,7 @@ fi
 
 echo "Stopping dependent services..."
 
-docker-compose stop analytics-service data-collection-service notification-service postgres-backup
+docker compose stop analytics-service data-collection-service notification-service postgres-backup
 
 sleep 5
 
