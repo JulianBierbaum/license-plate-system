@@ -64,7 +64,6 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
-      APP_PASSWORD: ${APP_PASSWORD}
     depends_on:
       db-prestart:
         condition: service_completed_successfully
@@ -125,7 +124,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT_EXTERN}:5432"
+      - "${DB_PORT_EXTERNAL}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -138,7 +137,7 @@ services:
   postgres-backup:
     image: julianbierbaum/license-plate-system:db-backup
     volumes:
-      - ${BACKUP_DIR}:/backups
+      - ${BACKUP_DIR}:/backups:rw
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
@@ -146,6 +145,7 @@ services:
       DB_USER: ${POSTGRES_ADMIN_USER}
       DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE}
     depends_on:
       db-prestart:
         condition: service_completed_successfully

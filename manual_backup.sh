@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Manual PostgreSQL Backup Script for License Plate System
-# Usage: ./backup.sh [backup_name]
+# Usage: ./backup.sh <BACKUP_NAME>
 
 set -e
 
@@ -21,7 +21,7 @@ BACKUP_DIR="${BACKUP_DIR}"
 mkdir -p "$BACKUP_DIR"
 
 # Find running PostgreSQL container
-POSTGRES_CONTAINER=$(docker-compose ps -q postgres)
+POSTGRES_CONTAINER=$(docker compose ps -q postgres)
 if [ -z "$POSTGRES_CONTAINER" ]; then
     echo "Error: PostgreSQL container not found. Is it running?"
     exit 1
@@ -31,11 +31,10 @@ fi
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="$BACKUP_DIR/${DB_NAME}_manual_${TIMESTAMP}.dump"
 
-echo "=== Starting automated backup ==="
+echo "=== Starting manual backup ==="
 echo "Database: $DB_NAME"
 echo "Container: $POSTGRES_CONTAINER"
 echo "Backup file: $BACKUP_FILE"
-echo "Retention: $BACKUP_RETENTION_DAYS day(s)"
 echo "================================="
 
 # Create backup

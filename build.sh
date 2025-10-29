@@ -1,11 +1,21 @@
 #!/bin/bash
 
 # Build script for the project services
-# Usage: ./build.sh [-p for pushing to docker registry] [list of service names seperated by spaces]
+# Usage: `./build.sh [-p] [SERVICE...]`
 
 set -e
 
-REPO="julianbierbaum/license-plate-system"
+# Load environment variables from .env file
+if [ -f ".env" ]; then
+    set -a
+    source ".env"
+    set +a
+else
+    echo "Error: .env file not found in project root"
+    exit 1
+fi
+
+DOCKER_REGISTRY="${DOCKER_REGISTRY}"
 PUSH=false
 SERVICES_TO_BUILD=()
 
@@ -34,21 +44,21 @@ if [ -f "db/pyproject.toml" ] && [ ! -f "db/uv.lock" ]; then
 fi
 
 # Build db-prestart
-docker build -t "${REPO}:db-prestart" -f ./db/Dockerfile .
+docker build -t "${DOCKER_REGISTRY}:db-prestart" -f ./db/Dockerfile .
 if [ "$PUSH" = true ]; then
-  docker push "${REPO}:db-prestart"
+  docker push "${DOCKER_REGISTRY}:db-prestart"
 fi
 
 # Build db-backup
-docker build -t "${REPO}:db-backup" -f ./db-backup/Dockerfile ./db-backup
+docker build -t "${DOCKER_REGISTRY}:db-backup" -f ./db-backup/Dockerfile ./db-backup
 if [ "$PUSH" = true ]; then
-  docker push "${REPO}:db-backup"
+  docker push "${DOCKER_REGISTRY}:db-backup"
 fi
 
 # Build shared-data
-docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data
+docker build -f shared-data/Dockerfile -t "${DOCKER_REGISTRY}:shared-data" ./shared-data
 if [ "$PUSH" = true ]; then
-  docker push "${REPO}:shared-data"
+  docker push "${DOCKER_REGISTRY}:shared-data"
 fi
 
 # Build services
@@ -72,10 +82,10 @@ for SERVICE_NAME in "${SERVICES_TO_BUILD[@]}"; do
     exit 1
   fi
 
-  docker build -t "${REPO}:${SERVICE_NAME}" "$SERVICE_DIR"
+  docker build -t "${DOCKER_REGISTRY}:${SERVICE_NAME}" "$SERVICE_DIR"
 
   if [ "$PUSH" = true ]; then
-    docker push "${REPO}:${SERVICE_NAME}"
+    docker push "${DOCKER_REGISTRY}:${SERVICE_NAME}"
   fi
 done
 
