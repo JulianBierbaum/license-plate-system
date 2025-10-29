@@ -7,22 +7,15 @@ from fastapi.security import HTTPBasic, HTTPBasicCredentials
 
 from src.config import settings
 from src.db.session import get_db
-from src.exceptions.camera_exceptions import (
-    AuthenticationError,
-    CameraDataError,
-    SnapshotError,
-)
-from src.exceptions.database_exceptions import (
-    DatabaseIntegrityError,
-    DatabaseQueryError,
-)
-from src.exceptions.plate_recognizer_exceptions import PlateRecognizerCallError
 from src.handlers.camera_handler import CameraHandler
 from src.handlers.country_handler import CountryHandler
 from src.handlers.database_handler import DatabaseHandler
 from src.handlers.plate_recognizer_handler import PlateRecognizerHandler
 from src.logger import logger
 from src.schemas.vehicle_detection_request import VehicleDetectionRequest
+from src.exceptions.camera_exceptions import CameraException
+from src.exceptions.database_exceptions import DatabaseException
+from src.exceptions.plate_recognizer_exceptions import PlateRecognizerException
 
 app = FastAPI()
 camera_service = CameraHandler()
@@ -90,13 +83,7 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
             cameras = camera_service.get_camera_data(host=settings.synology_host, sid=sid)
 
             # Find target camera
-            target_camera = None
-            for camera in cameras:
-                if camera.name == camera_name:
-                    target_camera = camera
-                    break
-            if not target_camera:
-                raise CameraDataError(f"Camera '{camera_name}' not found in Synology data")
+            target_camera = camera_service.get_camera_by_name(cameras=cameras, camera_name=camera_name)
 
             # Get camera snapshot
             frame = camera_service.get_camera_snapshot(host=settings.synology_host, sid=sid, camera=target_camera)
@@ -137,24 +124,9 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
                     interval=timedelta(seconds=settings.interval_seconds),
                 ):
                     db_handler.create_observation_entry(db=db, observation=observation_data)
-    except AuthenticationError as e:
-        logger.exception(f'Camera authentication failed: {e}')
-        return
-    except CameraDataError as e:
-        logger.exception(f'Camera data retrieval failed: {e}')
-        return
-    except SnapshotError as e:
-        logger.exception(f'Camera snapshot retrieval failed: {e}')
-        return
-    except PlateRecognizerCallError as e:
-        logger.exception(f'PlateRecognizer API request failed: {e}')
-        return
-    except DatabaseQueryError as e:
-        logger.exception(f'Database query failed: {e}')
-        return
-    except DatabaseIntegrityError as e:
-        logger.exception(f'Database integrity error: {e}')
-        return
+
+    except (CameraException, PlateRecognizerException, DatabaseException) as e:
+        logger.exception(f'{type(e).__name__}: {e}')
     except Exception as e:
-        logger.exception(f'An unexpected error occurred during background processing: {e}')
-        return
+        logger.exception(f'Unexpected error during background processing: {e}')
+    return

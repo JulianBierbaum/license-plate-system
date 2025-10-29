@@ -37,36 +37,49 @@ if [ ${#SERVICES_TO_BUILD[@]} -eq 0 ]; then
   SERVICES_TO_BUILD=($(basename -a services/*/))
 fi
 
-(cd db && uv sync)
-docker build -t "${DOCKER_REGISTRY}:db-prestart" -f ./db/Dockerfile .
+# Check for required lock files before building
+if [ -f "db/pyproject.toml" ] && [ ! -f "db/uv.lock" ]; then
+  echo "Error: db/uv.lock not found. Run 'cd db && uv lock' first."
+  exit 1
+fi
+
+# Build db-prestart
+docker build -t "${REPO}:db-prestart" -f ./db/Dockerfile .
 if [ "$PUSH" = true ]; then
   docker push "${DOCKER_REGISTRY}:db-prestart"
 fi
 
-(cd db-backup)
-docker build -t "${DOCKER_REGISTRY}:db-backup" -f ./db-backup/Dockerfile ./db-backup
+# Build db-backup
+docker build -t "${REPO}:db-backup" -f ./db-backup/Dockerfile ./db-backup
 if [ "$PUSH" = true ]; then
   docker push "${DOCKER_REGISTRY}:db-backup"
 fi
 
-docker build -f shared-data/Dockerfile -t "${DOCKER_REGISTRY}:shared-data" ./shared-data
+# Build shared-data
+docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data
 if [ "$PUSH" = true ]; then
   docker push "${DOCKER_REGISTRY}:shared-data"
 fi
 
+# Build services
 for SERVICE_NAME in "${SERVICES_TO_BUILD[@]}"; do
   SERVICE_DIR="services/${SERVICE_NAME}/"
+
   if [ ! -d "$SERVICE_DIR" ]; then
     echo "Service '$SERVICE_NAME' not found in services/"
     exit 1
   fi
 
-  if [ -f "${SERVICE_DIR}pyproject.toml" ]; then
-    (cd "$SERVICE_DIR" && uv sync)
+  # Check Python lock file
+  if [ -f "${SERVICE_DIR}pyproject.toml" ] && [ ! -f "${SERVICE_DIR}uv.lock" ]; then
+    echo "Error: ${SERVICE_DIR}uv.lock not found. Run uv sync first."
+    exit 1
   fi
 
-  if [ -f "${SERVICE_DIR}package.json" ]; then
-    (cd "$SERVICE_DIR" && npm install)
+  # Check Node.js lock file
+  if [ -f "${SERVICE_DIR}package.json" ] && [ ! -f "${SERVICE_DIR}package-lock.json" ]; then
+    echo "Error: ${SERVICE_DIR}package-lock.json not found. Run npm install first."
+    exit 1
   fi
 
   docker build -t "${DOCKER_REGISTRY}:${SERVICE_NAME}" "$SERVICE_DIR"
@@ -75,3 +88,5 @@ for SERVICE_NAME in "${SERVICES_TO_BUILD[@]}"; do
     docker push "${DOCKER_REGISTRY}:${SERVICE_NAME}"
   fi
 done
+
+echo "Build completed successfully!"

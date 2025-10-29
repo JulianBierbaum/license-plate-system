@@ -97,6 +97,24 @@ class CameraHandler:
         except Exception:
             raise
 
+    def get_camera_by_name(self, cameras: list[SynologyCamera], camera_name: str) -> SynologyCamera:
+        """Find a camera by name from the list of cameras.
+        Args:
+            cameras (list[SynologyCamera]): List of cameras to search through
+            camera_name (str): Name of the camera to find
+
+        Raises:
+            CameraDataError: If camera with given name is not found
+
+        Returns:
+            SynologyCamera: The camera object matching the name
+        """
+        for camera in cameras:
+            if camera.name == camera_name:
+                return camera
+
+        raise CameraDataError(f"Camera '{camera_name}' not found in Synology data")
+
     def get_camera_snapshot(self, host: str, sid: str, camera: SynologyCamera) -> requests.Response:
         """Requests snapshot from a selected camera.
         Args:
