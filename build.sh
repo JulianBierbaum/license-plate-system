@@ -44,19 +44,19 @@ if [ -f "db/pyproject.toml" ] && [ ! -f "db/uv.lock" ]; then
 fi
 
 # Build db-prestart
-docker build -t "${REPO}:db-prestart" -f ./db/Dockerfile .
+docker build -t "${DOCKER_REGISTRY}:db-prestart" -f ./db/Dockerfile .
 if [ "$PUSH" = true ]; then
   docker push "${DOCKER_REGISTRY}:db-prestart"
 fi
 
 # Build db-backup
-docker build -t "${REPO}:db-backup" -f ./db-backup/Dockerfile ./db-backup
+docker build -t "${DOCKER_REGISTRY}:db-backup" -f ./db-backup/Dockerfile ./db-backup
 if [ "$PUSH" = true ]; then
   docker push "${DOCKER_REGISTRY}:db-backup"
 fi
 
 # Build shared-data
-docker build -f shared-data/Dockerfile -t "${REPO}:shared-data" ./shared-data
+docker build -f shared-data/Dockerfile -t "${DOCKER_REGISTRY}:shared-data" ./shared-data
 if [ "$PUSH" = true ]; then
   docker push "${DOCKER_REGISTRY}:shared-data"
 fi
