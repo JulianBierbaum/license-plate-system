@@ -24,20 +24,24 @@ if [ -f "db/pyproject.toml" ] && [ ! -f "db/uv.lock" ]; then
 fi
 
 # Build db-prestart
+echo "--- Building db-prestart ---"
 docker build -t "${DOCKER_REGISTRY}:db-prestart" -f ./db/Dockerfile .
 docker push "${DOCKER_REGISTRY}:db-prestart"
 
 # Build db-backup
+echo "--- Building db-backup ---"
 docker build -t "${DOCKER_REGISTRY}:db-backup" -f ./db-backup/Dockerfile ./db-backup
 docker push "${DOCKER_REGISTRY}:db-backup"
 
 # Build shared-data
+echo "--- Building shared-data ---"
 docker build -f shared-data/Dockerfile -t "${DOCKER_REGISTRY}:shared-data" ./shared-data
 docker push "${DOCKER_REGISTRY}:shared-data"
 
 # Build all services
 for SERVICE_DIR in services/*/; do
   SERVICE_NAME=$(basename "$SERVICE_DIR")
+  echo "--- Building ${SERVICE_NAME} ---"
 
   # Check Python lock file
   if [ -f "${SERVICE_DIR}pyproject.toml" ] && [ ! -f "${SERVICE_DIR}uv.lock" ]; then

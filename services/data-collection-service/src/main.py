@@ -102,7 +102,7 @@ def process_vehicle_detection(camera_name: str, detection_time: datetime):
                     logger.exception(f'Failed to save image: {e}')
 
             # Send image to api
-            result = plate_service.send_to_api(api_key=settings.api_key, image_data=image_data, camera_name=camera_name)
+            result = plate_service.send_to_api(api_key=settings.api_key, image_data=image_data, camera_name=camera_name, service_url=settings.plate_recognizer_service_url)
             if not result:
                 logger.info('Plate Recognizer returned no actual observations')
                 return

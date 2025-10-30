@@ -57,6 +57,7 @@ services:
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
       SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG:-true}
       INTERVAL_SECONDS: ${INTERVAL_SECONDS}
+      PLATE_RECOGNIZER_SERVICE_URL: ${PLATE_RECOGNIZER_SERVICE_URL}
     depends_on:
       db-prestart:
         condition: service_completed_successfully
