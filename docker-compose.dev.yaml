@@ -1,0 +1,181 @@
+services:
+  analytics-service:
+    build:
+      context: ./services/analytics-service
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000"
+    volumes:
+      - ./services/analytics-service/src:/app/src:rw
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${ANALYTICS_DB_USER}
+      DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      ANALYTICS_SCHEMA: ${ANALYTICS_SCHEMA}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5000"
+    volumes:
+      - ./services/auth-service/src:/app/src:rw
+    environment:
+      ACTIVE_DIRECTORY_URL: ${ACTIVE_DIRECTORY_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  data-collection-service:
+    build:
+      context: ./services/data-collection-service
+      dockerfile: Dockerfile
+    ports:
+      - "5003:5000"
+    volumes:
+      - ./services/data-collection-service/src:/app/src:rw
+      - ${SAVE_DIR}:/app/snapshots:rw
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DATA_COLLECTION_DB_USER}
+      DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
+      DATA_COLLECTION_SCHEMA: ${DATA_COLLECTION_SCHEMA}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+      SYNOLOGY_HOST: ${SYNOLOGY_HOST}
+      SYNOLOGY_USERNAME: ${SYNOLOGY_USERNAME}
+      SYNOLOGY_PASSWORD: ${SYNOLOGY_PASSWORD}
+      API_KEY: ${PLATE_RECOGNIZER_API_KEY}
+      SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG:-true}
+      INTERVAL_SECONDS: ${INTERVAL_SECONDS}
+      PLATE_RECOGNIZER_SERVICE_URL: ${PLATE_RECOGNIZER_SERVICE_URL}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  notification-service:
+    build:
+      context: ./services/notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "5004:5000"
+    volumes:
+      - ./services/notification-service/src:/app/src:rw
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${NOTIFICATION_DB_USER}
+      DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      NOTIFICATION_SCHEMA: ${NOTIFICATION_SCHEMA}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+      ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
+      SENDER_ADDRESS: ${SENDER_ADDRESS}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  web-service:
+    build:
+      context: ./services/web-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./services/web-service:/app:rw
+      - /app/node_modules
+    environment:
+      AUTH_SERVICE_URL: ${AUTH_SERVICE_URL}
+      ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
+      NOTIFICATION_SERVICE_URL: ${NOTIFICATION_SERVICE_URL}
+      NODE_ENV: development
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  plate-recognizer:
+    image: platerecognizer/alpr:latest
+    volumes:
+      - license:/license
+    environment:
+      LICENSE_KEY: ${LICENSE_KEY}
+      TOKEN: ${PLATE_RECOGNIZER_API_KEY}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+  db-prestart:
+    build:
+      context: .
+      dockerfile: db/Dockerfile
+    volumes:
+      - ./db/alembic/versions:/app/alembic/versions:rw
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${POSTGRES_ADMIN_USER}
+      DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+      ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      DATA_COLLECTION_DB_PASSWORD: ${DATA_COLLECTION_DB_PASSWORD}
+      NOTIFICATION_DB_PASSWORD: ${NOTIFICATION_DB_PASSWORD}
+      DATA_COLLECTION_SCHEMA: ${DATA_COLLECTION_SCHEMA}
+      ANALYTICS_SCHEMA: ${ANALYTICS_SCHEMA}
+      NOTIFICATION_SCHEMA: ${NOTIFICATION_SCHEMA}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "${DB_PORT_EXTERNAL}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ADMIN_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  postgres-backup:
+    build:
+      context: ./db-backup
+      dockerfile: Dockerfile
+    volumes:
+      - ${BACKUP_DIR}:/backups:rw
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${POSTGRES_ADMIN_USER}
+      DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  license:
