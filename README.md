@@ -41,8 +41,8 @@ The project uses a fully containerized architecture, allowing straightforward de
 All service images are production-ready and can be deployed without modifying the service code.
 
 Steps:
-1. Build images and push them to a docker registry via the `build.sh` script if deployment is on a different machine.
-2. The provided `docker-compose.prod.yaml` file is modified for production needs and uses docker-registry images
+1. Images should be automatically pushed to the docker registry by committing to the main-branch of the github repository. You can manually build images and push them to a docker registry via the `build.sh` script.
+2. The provided `docker-compose.prod.yaml` file is modified for production needs and uses the docker-registry images
 2. Define Service Dependencies. You can use the provided file and modify it for production needs or use a different container orchestrator (e.g. k8s).
 3. Ensure the required env variables are set in the production environment
 4. Deploy System
