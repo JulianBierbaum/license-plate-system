@@ -8,13 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Show environment variables
-        run: cat .env || echo ".env not found"
 
       - name: Log in to Docker registry
         uses: docker/login-action@v3
