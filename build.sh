@@ -5,13 +5,18 @@
 
 set -e
 
-# Load environment variables from .env file
+# Load .env only if not already set
 if [ -f ".env" ]; then
+    echo "Loading .env file..."
     set -a
     source ".env"
     set +a
 else
-    echo "Error: .env file not found in project root"
+    echo "Warning: .env file not found, assuming environment variables are provided by CI."
+fi
+
+if [ -z "${DOCKER_REGISTRY}" ]; then
+    echo "Error: DOCKER_REGISTRY not set"
     exit 1
 fi
 
