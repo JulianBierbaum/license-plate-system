@@ -4,13 +4,7 @@ License plate recognition system for Zotter Schokoladen GmbH.
 ### / Dev Environment Setup
 1. Make sure all environment variables are set correctly in the .env file.
 <br>
-2. Run the `build.sh` script to build images.
-    - Usage: `./build.sh [-p] [SERVICE...]`
-    - Optional Arguments
-        - `-p` Push the built images to the Docker registry
-        - `SERVICE...` One or more service names to build, separated by spaces
-<br>
-3. Now you can start the docker stack manually or use the `./run` script.
+2. Start the docker stack manually via the `docker-compose.dev.yaml` file or use the `./run` script.
 
 <br>
 
@@ -47,7 +41,8 @@ The project uses a fully containerized architecture, allowing straightforward de
 All service images are production-ready and can be deployed without modifying the service code.
 
 Steps:
-1. Build images and push them to a docker registry if deployment is on a different machine.
-2. Define Service Dependencies. You can use the provided `docker-compose.yaml` file and modify it for production needs or use a different container orchestrator (e.g. k8s).
+1. Build images and push them to a docker registry via the `build.sh` script if deployment is on a different machine.
+2. The provided `docker-compose.prod.yaml` file is modified for production needs and uses docker-registry images
+2. Define Service Dependencies. You can use the provided file and modify it for production needs or use a different container orchestrator (e.g. k8s).
 3. Ensure the required env variables are set in the production environment
 4. Deploy System

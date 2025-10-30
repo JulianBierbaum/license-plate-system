@@ -13,4 +13,4 @@ cleanup() {
 trap cleanup EXIT
 
 # Start the services
-docker compose up
+docker compose -f docker-compose.dev.yaml up --build
