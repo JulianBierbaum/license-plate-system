@@ -27,7 +27,7 @@ echo "Database: $DB_NAME"
 echo "Container: $POSTGRES_CONTAINER"
 echo "Backup file: $BACKUP_FILE"
 echo "Retention: $BACKUP_RETENTION_DAYS day(s)"
-echo "================================="
+echo "=================================="
 
 # Wait for PostgreSQL to be ready
 echo "Checking database connectivity..."
