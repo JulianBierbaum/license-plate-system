@@ -21,7 +21,7 @@ else
 fi
 
 DB_HOST="$1"
-DB_PORT="${3:-5432}"
+DB_PORT="${2:-5432}"
 
 # map localhost -> host.docker.internal
 if [ "$DB_HOST" = "localhost" ] || [ "$DB_HOST" = "127.0.0.1" ]; then
@@ -63,11 +63,9 @@ docker run --rm -i \
             --clean \
             --no-owner \
             --no-privileges \
-            --format=custom > /backup/$BACKUP_FILE
+            --format=custom | gzip > /backup/$BACKUP_FILE.gz
     "
 
-# Compress backup
-gzip "$BACKUP_FILE"
 BACKUP_FILE_FINAL="${BACKUP_FILE}.gz"
 BACKUP_SIZE=$(du -h "$BACKUP_FILE_FINAL" | cut -f1)
 
