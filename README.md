@@ -3,7 +3,6 @@ License plate recognition system for Zotter Schokoladen GmbH.
 
 ### / Dev Environment Setup
 1. Make sure all environment variables are set correctly in the .env file.
-<br>
 2. Start the docker stack manually via the `docker-compose.dev.yaml` file or use the `./run` script.
 
 <br>
@@ -27,13 +26,12 @@ The `postgres-backup` service creates periodic backups based on the schedule in 
 The retention time of the automatic backups can be defined via the `BACKUP_RETENTION_DAYS` variable.
 <br>
 Manual backups can be performed using the `manual_backup.sh` script.
-The Backups will be saved to the backup directory defined in the environment variables.
-- Usage: `./backup.sh <BACKUP_NAME>`
+The Backups will be saved to the backup directory defined in the environment variables (`BACKUP_DIR`).
+- Usage: `./backup.sh <DB_HOST> [DB_PORT]`
 <br>
 
-Both manual and automatic backups can be restored to the database using the `restore_backup.sh` script.
-Note that this requires the services to be stopped for the duration of the restoration process.
-- Usage: `./restore.sh <PATH_TO_BACKUP_FILE>`
+Both manual and automatic backups can be restored to the system-database using the `restore_backup.sh` script.
+- Usage: `./restore_backup.sh <PATH_TO_BACKUP_FILE> <DB_HOST> [DB_PORT]`
 ---
 
 ### / Deployment
