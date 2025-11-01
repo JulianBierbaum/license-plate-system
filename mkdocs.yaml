@@ -1,6 +1,8 @@
 site_name: License Plate Recognition System
 site_description: Documentation for Zotter Schokoladen GmbH License Plate System
 site_url: https://julianbierbaum.github.io/license-plate-system
+repo_url: https://github.com/julianbierbaum/license-plate-system
+repo_name: ""  # Hide text, show only the GitHub icon
 
 theme:
   name: material
@@ -28,6 +30,8 @@ theme:
     - header.autohide
     - search.highlight
     - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
 
 nav:
   - Home: index.md
