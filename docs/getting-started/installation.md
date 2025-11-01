@@ -15,7 +15,7 @@ cd license-plate-system
 
 The system uses a `.env` file to manage environment variables. You will need to create a `.env` file in the root of the project and populate it with the necessary configuration.
 
-A good starting point is to copy the `.env.example` file if one exists, or to create a new file and add the variables as described in the [Configuration](configuration.md) section.
+Use the provided `.env` file, or to create a new one and add the variables as described in the [Configuration](configuration.md) section.
 
 ## 3. Start the Application
 

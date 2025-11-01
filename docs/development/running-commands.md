@@ -9,7 +9,7 @@ Each Python service in this project is equipped with a set of tests that can be 
 For example, to run the tests for the `data-collection-service`:
 
 ```bash
-docker-compose -f docker-compose.dev.yaml run --rm data-collection-service pytest
+docker compose -f docker-compose.dev.yaml run --rm data-collection-service pytest
 ```
 
 This command starts a new container for the `data-collection-service`, runs `pytest`, and then removes the container.
@@ -27,7 +27,7 @@ When you make changes to the database models (e.g., in `services/data-collection
 To do this, run the following command:
 
 ```bash
-docker-compose -f docker-compose.dev.yaml run --rm db-prestart alembic revision --autogenerate -m "A descriptive message about your changes"
+docker compose -f docker-compose.dev.yaml run --rm db-prestart alembic revision --autogenerate -m "A descriptive message about your changes"
 ```
 
 This will create a new migration file in the `db/alembic/versions` directory.
@@ -39,7 +39,7 @@ The database migrations are automatically applied when the `db-prestart` service
 If you need to manually apply migrations, you can run:
 
 ```bash
-docker-compose -f docker-compose.dev.yaml run --rm db-prestart alembic upgrade head
+docker compose -f docker-compose.dev.yaml run --rm db-prestart alembic upgrade head
 ```
 
 ### Downgrading Migrations
@@ -47,5 +47,5 @@ docker-compose -f docker-compose.dev.yaml run --rm db-prestart alembic upgrade h
 To downgrade a migration, you can use the `alembic downgrade` command. For example, to downgrade by one revision:
 
 ```bash
-docker-compose -f docker-compose.dev.yaml run --rm db-prestart alembic downgrade -1
+docker compose -f docker-compose.dev.yaml run --rm db-prestart alembic downgrade -1
 ```

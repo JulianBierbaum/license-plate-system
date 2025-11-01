@@ -28,7 +28,7 @@ You can use this file directly or adapt it to your needs. For example, you might
 4.  **Start the application:** Use Docker Compose to start the application in detached mode:
 
     ```bash
-    docker-compose -f docker-compose.prod.yaml up -d
+    docker compose -f docker-compose.prod.yaml up -d
     ```
 
 This will pull the required images from your Docker registry and start all the services.

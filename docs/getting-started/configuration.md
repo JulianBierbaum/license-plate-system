@@ -37,7 +37,7 @@ The system is configured using environment variables. These variables are stored
 *   `SYNOLOGY_USERNAME`: The username for the Synology NAS.
 *   `SYNOLOGY_PASSWORD`: The password for the Synology NAS.
 *   `PLATE_RECOGNIZER_API_KEY`: The API key for the Plate Recognizer service.
-*   `SAVE_IMAGES_FOR_DEBUG`: Whether to save images for debugging purposes. Defaults to `true`.
+*   `SAVE_IMAGES_FOR_DEBUG`: Whether to save images for debugging purposes.
 *   `INTERVAL_SECONDS`: The interval in seconds to poll the Synology NAS for new images.
 *   `PLATE_RECOGNIZER_SERVICE_URL`: The URL of the Plate Recognizer service.
 *   `SAVE_DIR`: The directory to save snapshots to.
