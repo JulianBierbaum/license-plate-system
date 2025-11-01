@@ -52,7 +52,6 @@ nav:
     - Overview: deployment/overview.md
     - Building Images: deployment/building-images.md
     - Production Setup: deployment/production-setup.md
-    - Environment Variables: deployment/environment-vars.md
   - Reference:
     - Scripts: reference/scripts.md
     - Docker Compose: reference/docker-compose.md

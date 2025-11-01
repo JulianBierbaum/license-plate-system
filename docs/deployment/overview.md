@@ -27,4 +27,4 @@ The system is composed of the following services:
 
 ## Containerization
 
-All services are containerized using Docker. This allows for a consistent and reproducible deployment across different environments. The `docker-compose.yaml` files define the services, their dependencies, and their configurations.
+All services are containerized using Docker. This allows for a consistent and reproducible deployment across different environments. The `docker-compose.*.yaml` files define the services, their dependencies, and their configurations.

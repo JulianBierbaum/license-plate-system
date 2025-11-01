@@ -9,7 +9,6 @@ This file is used for local development.
 *   **Builds services locally:** It builds the Docker images for the services from the local source code.
 *   **Hot-reloading:** It mounts the source code directories as volumes, which enables hot-reloading when you make changes to the code.
 *   **Debug-friendly:** It sets the `LOG_LEVEL` to `DEBUG` by default, providing more verbose logging for development.
-*   **Exposes ports:** It exposes the ports of the services to the host machine, so you can access them directly.
 
 ## `docker-compose.prod.yaml`
 
