@@ -32,6 +32,7 @@ The Backups will be saved to the backup directory defined in the environment var
 
 Both manual and automatic backups can be restored to the system-database using the `restore_backup.sh` script.
 - Usage: `./restore_backup.sh <PATH_TO_BACKUP_FILE> <DB_HOST> [DB_PORT]`
+
 ---
 
 ### / Deployment
