@@ -1,0 +1,75 @@
+site_name: License Plate Recognition System
+site_description: Documentation for Zotter Schokoladen GmbH License Plate System
+site_url: https://julianbierbaum.github.io/license-plate-system
+repo_url: https://github.com/julianbierbaum/license-plate-system
+repo_name: ""  # Hide text, show only the GitHub icon
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - navigation.path
+    - navigation.instant
+    - search.suggest
+    - header.autohide
+    - search.highlight
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Prerequisites: getting-started/prerequisites.md
+    - Installation: getting-started/installation.md
+    - Configuration: getting-started/configuration.md
+  - Development:
+    - Dev Setup: development/setup.md
+    - Docker Commands: development/docker-commands.md
+    - Running Commands: development/running-commands.md
+    - Troubleshooting: development/troubleshooting.md
+  - Operations:
+    - Backups: operations/backups.md
+    - Restore: operations/restore.md
+    - Monitoring: operations/monitoring.md
+  - Deployment:
+    - Overview: deployment/overview.md
+    - Building Images: deployment/building-images.md
+    - Production Setup: deployment/production-setup.md
+  - Reference:
+    - Scripts: reference/scripts.md
+    - Docker Compose: reference/docker-compose.md
+    - API: reference/api.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - attr_list
+  - md_in_html
+
+plugins:
+  - search
