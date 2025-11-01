@@ -21,7 +21,11 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.top
+    - navigation.footer
+    - navigation.path
+    - navigation.instant
     - search.suggest
+    - header.autohide
     - search.highlight
     - content.code.copy
 
