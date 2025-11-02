@@ -25,7 +25,3 @@ The **Operations** section provides guidance on essential maintenance tasks, inc
 ## Deployment
 
 The system is designed for containerized deployment. Refer to the **Deployment** section for instructions on building and deploying the application in a production environment.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](https://opensource.org/licenses/MIT) file for details.
