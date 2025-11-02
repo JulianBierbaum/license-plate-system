@@ -30,8 +30,14 @@ theme:
     - header.autohide
     - search.highlight
     - content.code.copy
+    - navigation.expand
+    - toc.integrate
+    - search.share
   icon:
     repo: fontawesome/brands/github
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/julianbierbaum/license-plate-system
 
 nav:
   - Home: index.md
