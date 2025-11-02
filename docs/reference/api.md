@@ -6,7 +6,7 @@ This document provides a reference for the API endpoints available in the **Lice
 
 ## Data Collection Service
 
-The **Data Collection Service** is responsible for receiving vehicle detection data.
+The **Data Collection Service** is responsible for receiving vehicle detection data and saving it in the database.
 
 #### `POST /api/vehicle_detected`
 
