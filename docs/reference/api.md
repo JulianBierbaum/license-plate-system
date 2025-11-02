@@ -31,8 +31,6 @@ Submit vehicle detection data.
 
 The **Notification Service** manages user preferences for notifications.
 
----
-
 ### User Preferences
 
 #### `POST /user_preferences/`
