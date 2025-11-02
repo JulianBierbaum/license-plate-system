@@ -1,30 +1,37 @@
 # API Reference
 
-This document provides a reference for the API endpoints available in the License Plate System.
+This document provides a reference for the API endpoints available in the **License Plate System**.
+
+---
 
 ## Data Collection Service
 
-The Data Collection Service is responsible for receiving vehicle detection data.
+The **Data Collection Service** is responsible for receiving vehicle detection data.
 
-### `POST /api/vehicle_detected`
+#### `POST /api/vehicle_detected`
 
-This endpoint is used to submit vehicle detection data.
+Submit vehicle detection data.
 
-**Request Body:**
+??? info "Request Body"
+    ```json
+    {
+      "camera": "string"
+    }
+    ```
 
-The request body should be a JSON object with the following structure:
+    **Fields**
 
-```json
-{
-  "camera": "string"
-}
-```
+    | Name     | Type   | Description                                   |
+    |-----------|--------|-----------------------------------------------|
+    | `camera`  | string | The name of the camera that detected the vehicle. |
 
--   `camera` (str): The name of the camera that detected the vehicle.
+---
 
 ## Notification Service
 
-The Notification Service is responsible for managing user preferences for notifications.
+The **Notification Service** manages user preferences for notifications.
+
+---
 
 ### User Preferences
 
@@ -32,62 +39,87 @@ The Notification Service is responsible for managing user preferences for notifi
 
 Create new user preferences.
 
-**Request Body:**
+??? example "Request Body"
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "notifications_enabled": true
+    }
+    ```
 
--   `name` (str): The name of the user.
--   `email` (str): The email address of the user.
--   `notifications_enabled` (bool): Whether notifications are enabled for the user.
+    **Fields**
 
-**Response:**
+    | Name                   | Type  | Description                                   |
+    |------------------------|-------|-----------------------------------------------|
+    | `name`                 | string | The name of the user.                        |
+    | `email`                | string | The email address of the user.               |
+    | `notifications_enabled`| bool   | Whether notifications are enabled.           |
 
+**Response:**  
 Returns the newly created user preferences record.
+
+---
 
 #### `GET /user_preferences/`
 
 Retrieve all user preferences records.
 
-**Response:**
-
+**Response:**  
 Returns a list of all user preferences records.
+
+---
 
 #### `GET /user_preferences/{entry_id}`
 
 Retrieve user preferences by ID.
 
-**Path Parameters:**
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to retrieve. |
 
--   `entry_id` (int): The ID of the user preferences to retrieve.
-
-**Response:**
-
+**Response:**  
 Returns the requested user preferences record.
+
+---
 
 #### `GET /user_preferences/by-name/{name}`
 
 Retrieve user preferences by name.
 
-**Path Parameters:**
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `name` | string | The name of the user to retrieve preferences for. |
 
--   `name` (str): The name of the user to retrieve preferences for.
-
-**Response:**
-
+**Response:**  
 Returns the requested user preferences record.
+
+---
 
 #### `PUT /user_preferences/{entry_id}`
 
 Update user preferences by ID.
 
-**Path Parameters:**
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to update. |
 
--   `entry_id` (int): The ID of the user preferences to update.
+??? example "Request Body"
+    ```json
+    {
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "notifications_enabled": false
+    }
+    ```
 
-**Request Body:**
+    **Fields (all optional)**
 
--   `name` (str, optional): The name of the user.
--   `email` (str, optional): The email address of the user.
--   `notifications_enabled` (bool, optional): Whether notifications are enabled for the user.
+    | Name | Type | Description |
+    |------|------|-------------|
+    | `name` | string | The name of the user. |
+    | `email` | string | The email address of the user. |
+    | `notifications_enabled` | bool | Whether notifications are enabled. |
 
-**Response:**
-
+**Response:**  
 Returns the updated user preferences record.
