@@ -12,7 +12,7 @@ The **Data Collection Service** is responsible for receiving vehicle detection d
 
 Submit vehicle detection data.
 
-??? info "Request Body"
+??? example "Request Body"
     ```json
     {
       "camera": "string"
