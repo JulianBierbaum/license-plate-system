@@ -1,12 +1,123 @@
 # API Reference
 
-This section will provide a detailed reference for the APIs exposed by the different services in the License Plate Recognition System.
+This document provides a reference for the API endpoints available in the **License Plate System**.
 
-This may include:
+---
 
-*   Endpoints for the `analytics-service`.
-*   Endpoints for the `auth-service`.
-*   Endpoints for the `notification-service`.
-*   Endpoints for the `data-collection-service`.
+## Data Collection Service
 
-*(This section is currently under development.)*
+The **Data Collection Service** is responsible for receiving vehicle detection data and saving it in the database.
+
+#### `POST /api/vehicle_detected`
+
+Submit vehicle detection data.
+
+??? example "Request Body"
+    ```json
+    {
+      "camera": "string"
+    }
+    ```
+
+    **Fields**
+
+    | Name     | Type   | Description                                   |
+    |-----------|--------|-----------------------------------------------|
+    | `camera`  | string | The name of the camera that detected the vehicle. |
+
+---
+
+## Notification Service
+
+The **Notification Service** manages user preferences for notifications.
+
+### User Preferences
+
+#### `POST /user_preferences/`
+
+Create new user preferences.
+
+??? example "Request Body"
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "notifications_enabled": true
+    }
+    ```
+
+    **Fields**
+
+    | Name                   | Type  | Description                                   |
+    |------------------------|-------|-----------------------------------------------|
+    | `name`                 | string | The name of the user.                        |
+    | `email`                | string | The email address of the user.               |
+    | `notifications_enabled`| bool   | Whether notifications are enabled.           |
+
+**Response:**  
+Returns the newly created user preferences record.
+
+---
+
+#### `GET /user_preferences/`
+
+Retrieve all user preferences records.
+
+**Response:**  
+Returns a list of all user preferences records.
+
+---
+
+#### `GET /user_preferences/{entry_id}`
+
+Retrieve user preferences by ID.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to retrieve. |
+
+**Response:**  
+Returns the requested user preferences record.
+
+---
+
+#### `GET /user_preferences/by-name/{name}`
+
+Retrieve user preferences by name.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `name` | string | The name of the user to retrieve preferences for. |
+
+**Response:**  
+Returns the requested user preferences record.
+
+---
+
+#### `PUT /user_preferences/{entry_id}`
+
+Update user preferences by ID.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to update. |
+
+??? example "Request Body"
+    ```json
+    {
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "notifications_enabled": false
+    }
+    ```
+
+    **Fields (all optional)**
+
+    | Name | Type | Description |
+    |------|------|-------------|
+    | `name` | string | The name of the user. |
+    | `email` | string | The email address of the user. |
+    | `notifications_enabled` | bool | Whether notifications are enabled. |
+
+**Response:**  
+Returns the updated user preferences record.

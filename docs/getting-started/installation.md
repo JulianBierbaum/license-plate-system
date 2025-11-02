@@ -7,15 +7,19 @@ Follow these steps to get the License Plate Recognition System up and running on
 First, clone the project repository from GitHub to your local machine:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/julianbierbaum/license-plate-system.git
 cd license-plate-system
 ```
 
 ## 2. Configure Environment Variables
 
-The system uses a `.env` file to manage environment variables. You will need to create a `.env` file in the root of the project and populate it with the necessary configuration.
+The system uses a `.env` file to manage environment variables. A `.env.example` file is provided with all the required variables. Copy this file to `.env` and fill in the values for your environment.
 
-Use the provided `.env` file, or to create a new one and add the variables as described in the [Configuration](configuration.md) section.
+```bash
+cp .env.example .env
+```
+
+Now, open the `.env` file and populate it with the necessary configuration as described in the [Configuration](configuration.md) section.
 
 ## 3. Start the Application
 
