@@ -21,7 +21,7 @@ class PlateRecognizerHandler:
         retry=retry_if_exception_type(requests.HTTPError),
         reraise=True,
     )
-    def send_to_api(self, api_key: str, image_data: bytes, camera_name: str) -> Any:
+    def send_to_api(self, api_key: str, image_data: bytes, camera_name: str, service_url: str) -> Any:
         """sends a new request to the api
 
         Args:
@@ -38,7 +38,7 @@ class PlateRecognizerHandler:
             image_buffer = BytesIO(image_data)
 
             response = requests.post(
-                'http://plate-recognizer:8080/v1/plate-reader/',
+                f'{service_url}/v1/plate-reader/',
                 data={
                     'camera_id': camera_name,
                     'regions': ['at', 'hu', 'si', 'de'],
