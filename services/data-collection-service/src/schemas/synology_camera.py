@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class SynologyCamera(BaseModel):
     """schema for synology camera data"""
+
+    model_config = ConfigDict(populate_by_name=True)
 
     id: int = Field(...)
     name: str | None = Field(None, alias='newName')
