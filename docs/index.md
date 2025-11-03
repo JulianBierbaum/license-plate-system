@@ -1,4 +1,4 @@
-# Welcome to the License Plate Recognition System
+# License Plate Recognition System Documentation
 
 This documentation provides a comprehensive overview of the License Plate Recognition System, developed for Zotter Schokoladen GmbH.
 
