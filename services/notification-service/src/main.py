@@ -18,6 +18,12 @@ app = FastAPI(
 
 app.include_router(api_router, prefix="/api")
 
+
+@app.get('/health', tags=['health'])
+async def health_check():
+    return {'status': 'ok'}
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Custom exception handler to log all HTTPExceptions before returning the response"""

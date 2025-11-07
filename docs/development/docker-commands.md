@@ -40,7 +40,7 @@ or for production:
 docker compose -f docker-compose.prod.yaml down
 ```
 
-The `run.sh` script has a cleanup function that automatically runs `docker compose down` on exit.
+The `run.sh` script has a cleanup function that automatically runs `docker compose -f docker-compose.dev.yaml down` on exit.
 
 ## Viewing Logs
 

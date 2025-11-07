@@ -49,6 +49,12 @@ services:
       SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
       INTERVAL_SECONDS: ${INTERVAL_SECONDS}
       PLATE_RECOGNIZER_SERVICE_URL: ${PLATE_RECOGNIZER_SERVICE_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       db-prestart:
         condition: service_completed_successfully
@@ -68,6 +74,12 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       db-prestart:
         condition: service_completed_successfully
@@ -152,6 +164,12 @@ services:
       DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
       BACKUP_SCHEDULE: ${BACKUP_SCHEDULE}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep crond || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       db-prestart:
         condition: service_completed_successfully

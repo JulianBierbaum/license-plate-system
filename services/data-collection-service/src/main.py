@@ -29,6 +29,11 @@ if settings.save_images_for_debug:
     os.makedirs('/app/snapshots', exist_ok=True)
 
 
+@app.get('/health')
+async def health_check():
+    return {'status': 'ok'}
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     """Custom exception handler to log all HTTPExceptions before returning the response"""
