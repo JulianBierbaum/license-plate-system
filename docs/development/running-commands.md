@@ -49,3 +49,23 @@ To downgrade a migration, you can use the `alembic downgrade` command. For examp
 ```bash
 docker compose -f docker-compose.dev.yaml run --rm db-prestart alembic downgrade -1
 ```
+
+## Accessing the Swagger UI
+
+Each of the Python-based services (e.g., `data-collection-service`, `notification-service`) provides the Swagger UI for API testing.
+
+To access the Swagger UI for a running service, open your web browser and navigate to:
+
+```
+http://localhost:<SERVICE_PORT>/docs
+```
+
+Replace `<SERVICE_PORT>` with the port number of the service you want to inspect, as defined in the `docker-compose.dev.yaml` file.
+
+### Example
+
+For example, to access the Swagger UI for the **data-collection-service**, which is mapped to port `5003`:
+
+```
+http://localhost:5003/docs
+```

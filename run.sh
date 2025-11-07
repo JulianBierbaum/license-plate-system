@@ -6,7 +6,7 @@
 # Function to be executed on exit
 cleanup() {
     echo "Stopping services and removing volumes..."
-    docker compose down
+    docker compose -f docker-compose.dev.yaml down
 }
 
 # Trap the EXIT signal and execute the cleanup function

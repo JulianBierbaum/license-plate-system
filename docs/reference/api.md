@@ -8,6 +8,20 @@ This document provides a reference for the API endpoints available in the **Lice
 
 The **Data Collection Service** is responsible for receiving vehicle detection data and saving it in the database.
 
+#### `GET /health`
+
+Check the health of the service. This endpoint is used by Docker's health check.
+
+**Response:**
+Returns a `200 OK` with a simple JSON body.
+```json
+{
+  "status": "ok"
+}
+```
+
+---
+
 #### `POST /api/vehicle_detected`
 
 Submit vehicle detection data.
@@ -30,6 +44,18 @@ Submit vehicle detection data.
 ## Notification Service
 
 The **Notification Service** manages user preferences for notifications.
+
+#### `GET /health`
+
+Check the health of the service. This endpoint is used by Docker's health check.
+
+**Response:**
+Returns a `200 OK` with a simple JSON body.
+```json
+{
+  "status": "ok"
+}
+```
 
 ### User Preferences
 
