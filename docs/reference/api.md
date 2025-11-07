@@ -1,232 +1,123 @@
 # API Reference
 
-This document provides a comprehensive reference for the API endpoints available in the **License Plate System**.
-
-### Data Collection Service
-
-#### `POST /api/vehicle_detected`
-**Description**: Submits vehicle detection data from a camera. This endpoint is called by a camera when it detects a vehicle.
-
-**Authentication Required**: Yes (HTTP Basic Auth)
-
-**Request Body**:
-```json
-{
-  "camera": "string"
-}
-```
-
-| Parameter | Type   | Required | Description                                  | Example        |
-|-----------|--------|----------|----------------------------------------------|----------------|
-| `camera`  | string | Yes      | The name of the camera that detected the vehicle. | "front-door"   |
-
-**Response**:
-- **Status Code**: 200 OK
-```json
-{
-  "status": "accepted",
-  "timestamp": "2025-11-07T12:00:00Z"
-}
-```
-
-**Error Responses**:
-- **401 Unauthorized**: Missing or invalid credentials.
-- **500 Internal Server Error**: Server error during processing.
-
-??? example "Example Request"
-    ```bash
-    curl -X POST https://api.example.com/api/vehicle_detected \
-      -u "username:password" \
-      -H "Content-Type: application/json" \
-      -d '{"camera": "driveway"}'
-    ```
+This document provides a reference for the API endpoints available in the **License Plate System**.
 
 ---
 
-### Notification Service
+## Data Collection Service
 
-#### `POST /api/user_preferences/`
-**Description**: Creates a new user preference setting.
+The **Data Collection Service** is responsible for receiving vehicle detection data and saving it in the database.
 
-**Authentication Required**: No
+#### `POST /api/vehicle_detected`
 
-**Request Body**:
-```json
-{
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "receive_alerts": true,
-  "receive_updates": false
-}
-```
+Submit vehicle detection data.
 
-| Parameter        | Type    | Required | Description                               |
-|------------------|---------|----------|-------------------------------------------|
-| `name`           | string  | Yes      | User's name.                              |
-| `email`          | string  | Yes      | User's email address.                     |
-| `receive_alerts` | boolean | No       | Whether the user should receive alerts.   |
-| `receive_updates`| boolean | No       | Whether the user should receive updates.  |
-
-**Response**:
-- **Status Code**: 200 OK
-```json
-{
-  "id": 1,
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "receive_alerts": true,
-  "receive_updates": false,
-  "created_at": "2025-11-07T12:00:00Z",
-  "updated_at": null
-}
-```
-
-**Error Responses**:
-- **400 Bad Request**: Duplicate entry or database integrity error.
-
-??? example "Example Request"
-    ```bash
-    curl -X POST https://api.example.com/api/user_preferences/ \
-      -H "Content-Type: application/json" \
-      -d '{"name": "John Doe", "email": "john.doe@example.com", "receive_alerts": true}'
+??? example "Request Body"
+    ```json
+    {
+      "camera": "string"
+    }
     ```
 
-#### `GET /api/user_preferences/`
-**Description**: Retrieves all user preference settings.
+    **Fields**
 
-**Authentication Required**: No
+    | Name     | Type   | Description                                   |
+    |-----------|--------|-----------------------------------------------|
+    | `camera`  | string | The name of the camera that detected the vehicle. |
 
-**Response**:
-- **Status Code**: 200 OK
-```json
-[
-  {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "receive_alerts": true,
-    "receive_updates": false,
-    "created_at": "2025-11-07T12:00:00Z",
-    "updated_at": null
-  }
-]
-```
+---
 
-**Error Responses**:
-- **500 Internal Server Error**: Failed to fetch user preferences.
+## Notification Service
 
-??? example "Example Request"
-    ```bash
-    curl https://api.example.com/api/user_preferences/
+The **Notification Service** manages user preferences for notifications.
+
+### User Preferences
+
+#### `POST /user_preferences/`
+
+Create new user preferences.
+
+??? example "Request Body"
+    ```json
+    {
+      "name": "John Doe",
+      "email": "john@example.com",
+      "notifications_enabled": true
+    }
     ```
 
-#### `GET /api/user_preferences/{entry_id}`
-**Description**: Retrieves a specific user preference setting by its ID.
+    **Fields**
 
-**Authentication Required**: No
+    | Name                   | Type  | Description                                   |
+    |------------------------|-------|-----------------------------------------------|
+    | `name`                 | string | The name of the user.                        |
+    | `email`                | string | The email address of the user.               |
+    | `notifications_enabled`| bool   | Whether notifications are enabled.           |
 
-**Path Parameters**:
-| Parameter  | Type    | Required | Description                               |
-|------------|---------|----------|-------------------------------------------|
-| `entry_id` | integer | Yes      | The ID of the user preference to retrieve. |
+**Response:**  
+Returns the newly created user preferences record.
 
-**Response**:
-- **Status Code**: 200 OK
-```json
-{
-  "id": 1,
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "receive_alerts": true,
-  "receive_updates": false,
-  "created_at": "2025-11-07T12:00:00Z",
-  "updated_at": null
-}
-```
+---
 
-**Error Responses**:
-- **404 Not Found**: User preference not found.
-- **500 Internal Server Error**: Failed to fetch user preferences.
+#### `GET /user_preferences/`
 
-??? example "Example Request"
-    ```bash
-    curl https://api.example.com/api/user_preferences/1
+Retrieve all user preferences records.
+
+**Response:**  
+Returns a list of all user preferences records.
+
+---
+
+#### `GET /user_preferences/{entry_id}`
+
+Retrieve user preferences by ID.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to retrieve. |
+
+**Response:**  
+Returns the requested user preferences record.
+
+---
+
+#### `GET /user_preferences/by-name/{name}`
+
+Retrieve user preferences by name.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `name` | string | The name of the user to retrieve preferences for. |
+
+**Response:**  
+Returns the requested user preferences record.
+
+---
+
+#### `PUT /user_preferences/{entry_id}`
+
+Update user preferences by ID.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to update. |
+
+??? example "Request Body"
+    ```json
+    {
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "notifications_enabled": false
+    }
     ```
 
-#### `GET /api/user_preferences/by-name/{name}`
-**Description**: Retrieves a specific user preference setting by name.
+    **Fields (all optional)**
 
-**Authentication Required**: No
+    | Name | Type | Description |
+    |------|------|-------------|
+    | `name` | string | The name of the user. |
+    | `email` | string | The email address of the user. |
+    | `notifications_enabled` | bool | Whether notifications are enabled. |
 
-**Path Parameters**:
-| Parameter | Type   | Required | Description                             |
-|-----------|--------|----------|-----------------------------------------|
-| `name`    | string | Yes      | The name of the user to retrieve for.   |
-
-**Response**:
-- **Status Code**: 200 OK
-```json
-{
-  "id": 1,
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "receive_alerts": true,
-  "receive_updates": false,
-  "created_at": "2025-11-07T12:00:00Z",
-  "updated_at": null
-}
-```
-
-**Error Responses**:
-- **404 Not Found**: User preference not found.
-- **500 Internal Server Error**: Failed to fetch user preferences.
-
-??? example "Example Request"
-    ```bash
-    curl https://api.example.com/api/user_preferences/by-name/John%20Doe
-    ```
-
-#### `PUT /api/user_preferences/{entry_id}`
-**Description**: Updates an existing user preference setting.
-
-**Authentication Required**: No
-
-**Path Parameters**:
-| Parameter  | Type    | Required | Description                             |
-|------------|---------|----------|-----------------------------------------|
-| `entry_id` | integer | Yes      | The ID of the user preference to update. |
-
-**Request Body** (all fields are optional):
-```json
-{
-  "name": "Johnathan Doe",
-  "email": "john.doe.new@example.com",
-  "receive_alerts": false,
-  "receive_updates": true
-}
-```
-
-**Response**:
-- **Status Code**: 200 OK
-```json
-{
-  "id": 1,
-  "name": "Johnathan Doe",
-  "email": "john.doe.new@example.com",
-  "receive_alerts": false,
-  "receive_updates": true,
-  "created_at": "2025-11-07T12:00:00Z",
-  "updated_at": "2025-11-07T13:00:00Z"
-}
-```
-
-**Error Responses**:
-- **400 Bad Request**: Duplicate entry or database integrity error.
-- **404 Not Found**: User preference not found.
-
-??? example "Example Request"
-    ```bash
-    curl -X PUT https://api.example.com/api/user_preferences/1 \
-      -H "Content-Type: application/json" \
-      -d '{"receive_alerts": false}'
-    ```
+**Response:**  
+Returns the updated user preferences record.
