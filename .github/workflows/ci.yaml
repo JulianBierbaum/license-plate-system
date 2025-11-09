@@ -17,23 +17,23 @@ jobs:
         run: cp .env.example .env
 
       - name: Lint data-collection-service
-        run: docker-compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff check --fix src
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff check --fix src
 
       - name: Check formatting for data-collection-service
-        run: docker-compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff format src
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff format src
 
       - name: Run tests for data-collection-service
-        run: docker-compose -f docker-compose.dev.yaml run --rm data-collection-service pytest
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service pytest
 
       - name: Lint notification-service
-        run: docker-compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff check --fix src
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff check --fix src
 
       - name: Check formatting for notification-service
-        run: docker-compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff format src
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff format src
 
       - name: Run tests for notification-service
-        run: docker-compose -f docker-compose.dev.yaml run --rm notification-service pytest
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service pytest
         
       - name: Stop and remove containers, networks, volumes, and images
         if: always()
-        run: docker-compose -f docker-compose.dev.yaml down -v
+        run: docker compose -f docker-compose.dev.yaml down -v
