@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 
 
 class UserPreferencesBase(BaseModel):
@@ -34,8 +34,7 @@ class UserPreferenceInDB(UserPreferencesBase):
     created_at: datetime
     updated_at: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserPreference(UserPreferenceInDB):

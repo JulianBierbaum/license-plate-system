@@ -30,7 +30,7 @@ def get_entry(db: Session, entry_id: int) -> UserPreferences | None:
         stmt = select(UserPreferences).where(UserPreferences.id == entry_id)
         return db.execute(stmt).scalar_one_or_none()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError(f"Failed to fetch user preferences: {e}") from e
+        raise DatabaseQueryError(f'Failed to fetch user preferences: {e}') from e
 
 
 def get_entry_by_name(db: Session, name: str) -> UserPreferences | None:
@@ -50,7 +50,7 @@ def get_entry_by_name(db: Session, name: str) -> UserPreferences | None:
         stmt = select(UserPreferences).where(UserPreferences.name == name)
         return db.execute(stmt).scalar_one_or_none()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError(f"Failed to fetch user preferences: {e}") from e
+        raise DatabaseQueryError(f'Failed to fetch user preferences: {e}') from e
 
 
 def get_entry_by_email(db: Session, email: str) -> UserPreferences | None:
@@ -70,7 +70,7 @@ def get_entry_by_email(db: Session, email: str) -> UserPreferences | None:
         stmt = select(UserPreferences).where(UserPreferences.email == email)
         return db.execute(stmt).scalar_one_or_none()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError(f"Failed to fetch user preferences: {e}") from e
+        raise DatabaseQueryError(f'Failed to fetch user preferences: {e}') from e
 
 
 def get_entries(db: Session) -> list[UserPreferences]:
@@ -89,7 +89,7 @@ def get_entries(db: Session) -> list[UserPreferences]:
         stmt = select(UserPreferences)
         return db.execute(stmt).scalars().all()
     except SQLAlchemyError as e:
-        raise DatabaseQueryError(f"Failed to fetch preferences for all users: {e}") from e
+        raise DatabaseQueryError(f'Failed to fetch preferences for all users: {e}') from e
 
 
 def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferences:
@@ -110,14 +110,10 @@ def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferenc
     entry.email = str(entry.email).lower()
 
     if get_entry_by_name(db=db, name=entry.name):
-        raise DuplicateEntryError(
-            "An entry with the same name already exists in the database"
-        )
+        raise DuplicateEntryError('An entry with the same name already exists in the database')
 
     if get_entry_by_email(db=db, email=entry.email):
-        raise DuplicateEntryError(
-            "An entry with the same name already exists in the database"
-        )
+        raise DuplicateEntryError('An entry with the same name already exists in the database')
 
     db_entry = UserPreferences(
         name=entry.name,
@@ -132,12 +128,10 @@ def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferenc
         return db_entry
     except SQLAlchemyError as e:
         db.rollback()
-        raise DatabaseIntegrityError(f"Failed to add new user entry: {e}") from e
+        raise DatabaseIntegrityError(f'Failed to add new user entry: {e}') from e
 
 
-def update_entry(
-    db: Session, entry: UserPreferencesUpdate, entry_id: int
-) -> UserPreferences:
+def update_entry(db: Session, entry: UserPreferencesUpdate, entry_id: int) -> UserPreferences:
     """updates an user preferences entry
 
     Args:
@@ -154,20 +148,16 @@ def update_entry(
     """
     db_entry = get_entry(db=db, entry_id=entry_id)
     if not db_entry:
-        raise MissingEntryError("No entry with the specified id found")
+        raise MissingEntryError('No entry with the specified id found')
 
     entry.name = str(entry.name).lower()
     entry.email = str(entry.email).lower()
 
     if get_entry_by_name(db=db, name=entry.name) and db_entry.name != entry.name:
-        raise DuplicateEntryError(
-            "An entry with the same name already exists in the database"
-        )
+        raise DuplicateEntryError('An entry with the same name already exists in the database')
 
     if get_entry_by_email(db=db, email=entry.email) and db_entry.email != entry.email:
-        raise DuplicateEntryError(
-            "An entry with the same name already exists in the database"
-        )
+        raise DuplicateEntryError('An entry with the same name already exists in the database')
 
     try:
         update_data = entry.model_dump(exclude_unset=True)
@@ -180,4 +170,4 @@ def update_entry(
         return db_entry
     except SQLAlchemyError as e:
         db.rollback()
-        raise DatabaseIntegrityError(f"Failed to update user entry: {e}") from e
+        raise DatabaseIntegrityError(f'Failed to update user entry: {e}') from e
