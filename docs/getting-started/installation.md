@@ -36,7 +36,7 @@ This script will build the necessary Docker images and start all the services de
 Alternatively, you can use `docker-compose` directly:
 
 ```bash
-docker-compose -f docker-compose.dev.yaml up --build
+docker compose -f docker-compose.dev.yaml up --build
 ```
 
 ## 4. Accessing the Services

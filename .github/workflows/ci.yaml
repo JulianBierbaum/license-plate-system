@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [ "*" ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file
+        run: cp .env.example .env
+
+      - name: Lint data-collection-service
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff check --fix src
+
+      - name: Check formatting for data-collection-service
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff format src
+
+      - name: Run tests for data-collection-service
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service pytest
+
+      - name: Lint notification-service
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff check --fix src
+
+      - name: Check formatting for notification-service
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff format src
+
+      - name: Run tests for notification-service
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service pytest
+        
+      - name: Stop and remove containers, networks, volumes, and images
+        if: always()
+        run: docker compose -f docker-compose.dev.yaml down -v

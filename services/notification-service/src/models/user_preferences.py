@@ -12,7 +12,7 @@ class UserPreferences(NotificationBase):
         NotificationBase (postgres schema): base for the notification schema
     """
 
-    __tablename__ = "user_preferences"
+    __tablename__ = 'user_preferences'
 
     id = Column(
         Integer,
@@ -34,13 +34,13 @@ class UserPreferences(NotificationBase):
         Boolean,
         nullable=False,
         index=True,
-        server_default=text("false"),
+        server_default=text('false'),
     )
     receive_updates = Column(
         Boolean,
         nullable=False,
         index=True,
-        server_default=text("false"),
+        server_default=text('false'),
     )
     created_at = Column(
         DateTime(timezone=True),
