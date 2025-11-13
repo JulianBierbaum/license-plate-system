@@ -10,7 +10,6 @@ This documentation provides a comprehensive overview of the License Plate Recogn
 ![System Architecture](assets/allgemeinezusammenhänge-dark.png#only-dark)
 
 The system is designed as a modular, containerized application stack.  
-It integrates camera services, analytics, and data persistence to automate vehicle identification.
 
 ---
 
