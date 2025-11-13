@@ -2,6 +2,17 @@
 
 This documentation provides a comprehensive overview of the License Plate Recognition System, developed for Zotter Schokoladen GmbH.
 
+---
+
+## System Architecture
+
+![System Architecture](assets/architecture-light.png#only-light)
+![System Architecture](assets/architecture-dark.png#only-dark)
+
+The system is designed as a modular, containerized application stack.  
+
+---
+
 ## Quick Start
 
 1.  **Set up Environment:** Copy the `.env.example` file to `.env` and ensure all environment variables are correctly set.
