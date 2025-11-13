@@ -6,8 +6,8 @@ This documentation provides a comprehensive overview of the License Plate Recogn
 
 ## System Architecture
 
-![System Architecture](assets/allgemeinezusammenhänge-light.png#only-light)
-![System Architecture](assets/allgemeinezusammenhänge-dark.png#only-dark)
+![System Architecture](assets/architecture-light.png#only-light)
+![System Architecture](assets/architecture-dark.png#only-dark)
 
 The system is designed as a modular, containerized application stack.  
 
