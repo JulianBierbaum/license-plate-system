@@ -23,7 +23,7 @@ jobs:
         run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service uvx ruff check --fix src
 
       - name: Run tests for data-collection-service
-        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service pytest
+        run: docker compose -f docker-compose.dev.yaml run --rm data-collection-service pytest --cov=src
 
       - name: Check formatting for notification-service
         run: docker compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff format src
@@ -32,7 +32,7 @@ jobs:
         run: docker compose -f docker-compose.dev.yaml run --rm notification-service uvx ruff check --fix src
 
       - name: Run tests for notification-service
-        run: docker compose -f docker-compose.dev.yaml run --rm notification-service pytest
+        run: docker compose -f docker-compose.dev.yaml run --rm notification-service pytest --cov=src
 
       - name: Stop and remove containers, networks, volumes, and images
         if: always()
