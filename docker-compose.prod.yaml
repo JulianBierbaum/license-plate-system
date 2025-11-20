@@ -2,7 +2,7 @@ services:
   analytics-service:
     image: julianbierbaum/license-plate-system:analytics-service
     ports:
-      - "5001:5000"
+      - "5005:5000"
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
@@ -153,12 +153,10 @@ services:
     restart: on-failure
 
   grafana:
-    image: grafana/grafana:latest
+    image: julianbierbaum/license-plate-system:grafana
     ports:
       - "${GRAFANA_PORT_EXTERNAL}:3000"
     volumes:
-      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_data:/var/lib/grafana
     environment:
       DB_HOST: ${DB_HOST}

@@ -39,4 +39,4 @@ Before running the script, you need to:
 
 ### Script Details
 
-The `build.sh` script iterates through all the services in the `services` directory, builds a Docker image for each service, and then pushes the image to the configured Docker registry. It also builds and pushes images for `db-prestart`, `db-backup`, and `shared-data`.
+The `build.sh` script iterates through all the services in the `services` directory, builds a Docker image for each service, and then pushes the image to the configured Docker registry. It also builds and pushes images for `db-prestart`, `db-backup`, `shared-data`, and `grafana`.

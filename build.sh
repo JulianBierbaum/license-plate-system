@@ -43,6 +43,11 @@ echo "--- Building shared-data ---"
 docker build -f shared-data/Dockerfile -t "${DOCKER_REGISTRY}:shared-data" ./shared-data
 docker push "${DOCKER_REGISTRY}:shared-data"
 
+# Build grafana
+echo "--- Building grafana ---"
+docker build -t "${DOCKER_REGISTRY}:grafana" ./grafana
+docker push "${DOCKER_REGISTRY}:grafana"
+
 # Build all services
 for SERVICE_DIR in services/*/; do
   SERVICE_NAME=$(basename "$SERVICE_DIR")
