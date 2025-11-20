@@ -152,6 +152,26 @@ services:
       start_period: 10s
     restart: on-failure
 
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT_EXTERNAL}:3000"
+    volumes:
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      ANALYTICS_DB_USER: ${ANALYTICS_DB_USER}
+      ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+    restart: on-failure
+
   postgres-backup:
     image: julianbierbaum/license-plate-system:db-backup
     volumes:
@@ -178,3 +198,4 @@ services:
 volumes:
   postgres_data:
   license:
+  grafana_data:

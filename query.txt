@@ -1,0 +1,11 @@
+I want to integrate grafana into my current project to my current project. 
+grafana should read data from the ingestion-schema and display information like an historic graph, daily stats etc. (show me what you can come up with and think is relevant)
+make sure to read my documentation BEFOREHAND for infos about the projects quirks, features and helpful commands and please dont hesitate to ask my if you have ANY questions. 
+also make sure to read some data from the db to get a feel of how the data looks. 
+the stack is entirely controlled over docker so make sure to look in the docs for commands. 
+The grafana dashboard should be pre-configured so that the dashboard does not need to be configured manually. 
+also its only test data in the db so the newest data is from the end of october or something so be wary of that. 
+if you need a grafana folder create in in the project root
+if you need to add new env variables be sure to keep to the structure in the .env.example file and then mirror the changes over to the .env file
+all changes should be made to both compose files but keept there respective roles and differences intact.
+all the docs are located in the @docs directory
