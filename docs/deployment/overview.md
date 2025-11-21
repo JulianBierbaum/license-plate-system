@@ -1,6 +1,6 @@
 # Architecture Overview
 
-The License Plate Recognition System is a microservices-based application, designed for containerized deployment. The entire system is orchestrated using Docker Compose.
+The License Plate Recognition System is a service-oriented application, designed for containerized deployment. The entire system is orchestrated using Docker Compose.
 
 ## Services
 
@@ -15,6 +15,7 @@ The system is composed of the following services:
 *   **`postgres`**: The PostgreSQL database that stores all the application data.
 *   **`db-prestart`**: A service that runs database migrations before the other services start.
 *   **`postgres-backup`**: A service that performs periodic backups of the database.
+*   **`grafana`**: Visualization Service for the ingestion data from the data-collection service
 
 ## Data Flow
 

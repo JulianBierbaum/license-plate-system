@@ -49,6 +49,7 @@ The system is configured using environment variables. These variables are stored
 *   `NOTIFICATION_SCHEMA`: The database schema for the notification service.
 *   `ANALYTICS_SERVICE_URL`: The URL of the analytics service.
 *   `SENDER_ADDRESS`: The email address to send notifications from.
+*   `SMTP_RELAY_ADDRESS`: The IP of the SMTP open mail relay.
 
 ### Web Service
 
@@ -56,7 +57,7 @@ The system is configured using environment variables. These variables are stored
 *   `ANALYTICS_SERVICE_URL`: The URL of the analytics service.
 *   `NOTIFICATION_SERVICE_URL`: The URL of the notification service.
 
-### Plate Recognizer
+### Plate Recognizer Service
 
 *   `LICENSE_KEY`: The license key for the Plate Recognizer service.
 
@@ -65,3 +66,9 @@ The system is configured using environment variables. These variables are stored
 *   `BACKUP_DIR`: The directory to save backups to.
 *   `BACKUP_RETENTION_DAYS`: The number of days to retain automatic backups.
 *   `BACKUP_SCHEDULE`: The cron schedule for automatic backups.
+
+## Grafana
+
+*   `GRAFANA_ADMIN_USER`: The username for Grafana administrative access.
+*   `GRAFANA_ADMIN_PASSWORD`: The password for Grafana administrative access.
+*   `GRAFANA_PORT_EXTERNAL`: The external port for Grafana access.
