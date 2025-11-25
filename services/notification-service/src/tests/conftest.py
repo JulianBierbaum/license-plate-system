@@ -4,14 +4,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.config import settings
-from src.db.session import get_db  # Assuming this is your dependency override point
+from src.db.session import get_db
 from src.main import app
 
 test_engine = create_engine(str(settings.db_uri))
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_engine)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def db():
     """
     Provides a SQLAlchemy session for each test function.
@@ -30,7 +30,7 @@ def db():
         connection.close()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope='function')
 def client(db):
     """
     Provides a FastAPI test client configured to use the `db` fixture's session.

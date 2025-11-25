@@ -2,7 +2,7 @@ services:
   analytics-service:
     image: julianbierbaum/license-plate-system:analytics-service
     ports:
-      - "5001:5000"
+      - "5005:5000"
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
@@ -14,6 +14,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
+    restart: on-failure
 
   auth-service:
     image: julianbierbaum/license-plate-system:auth-service
@@ -30,6 +31,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
+    restart: on-failure
 
   data-collection-service:
     image: julianbierbaum/license-plate-system:data-collection-service
@@ -51,9 +53,17 @@ services:
       API_KEY: ${PLATE_RECOGNIZER_API_KEY}
       SAVE_IMAGES_FOR_DEBUG: ${SAVE_IMAGES_FOR_DEBUG}
       INTERVAL_SECONDS: ${INTERVAL_SECONDS}
+      PLATE_RECOGNIZER_SERVICE_URL: ${PLATE_RECOGNIZER_SERVICE_URL}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
-      plate-recognizer:
-        condition: service_healthy
+      db-prestart:
+        condition: service_completed_successfully
+    restart: on-failure
 
   notification-service:
     image: julianbierbaum/license-plate-system:notification-service
@@ -69,10 +79,16 @@ services:
       LOG_LEVEL: ${LOG_LEVEL}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
-      APP_PASSWORD: ${APP_PASSWORD}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     depends_on:
       db-prestart:
         condition: service_completed_successfully
+    restart: on-failure
 
   web-service:
     image: julianbierbaum/license-plate-system:web-service
@@ -85,6 +101,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
+    restart: on-failure
 
   plate-recognizer:
     image: platerecognizer/alpr:latest
@@ -102,11 +119,10 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
+    restart: on-failure
 
   db-prestart:
     image: julianbierbaum/license-plate-system:db-prestart
-    volumes:
-      - ./db/alembic/versions:/app/alembic/versions:rw
     environment:
       DB_HOST: ${DB_HOST}
       DB_PORT: 5432
@@ -130,7 +146,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT_EXTERN}:5432"
+      - "${DB_PORT_EXTERNAL}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -139,7 +155,50 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    restart: on-failure
+
+  grafana:
+    image: julianbierbaum/license-plate-system:grafana
+    ports:
+      - "${GRAFANA_PORT_EXTERNAL}:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_NAME: ${DB_NAME}
+      ANALYTICS_DB_USER: ${ANALYTICS_DB_USER}
+      ANALYTICS_DB_PASSWORD: ${ANALYTICS_DB_PASSWORD}
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+    restart: on-failure
+
+  postgres-backup:
+    image: julianbierbaum/license-plate-system:db-backup
+    volumes:
+      - ${BACKUP_DIR}:/backups:rw
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${POSTGRES_ADMIN_USER}
+      DB_PASSWORD: ${POSTGRES_ADMIN_PASSWORD}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS}
+      BACKUP_SCHEDULE: ${BACKUP_SCHEDULE}
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep crond || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      db-prestart:
+        condition: service_completed_successfully
+    restart: on-failure
 
 volumes:
   postgres_data:
   license:
+  grafana_data:

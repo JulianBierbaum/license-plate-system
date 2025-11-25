@@ -1,9 +1,12 @@
-# license-plate-system
-License plate recognition system for Zotter Schokoladen GmbH
+# License Plate System
 
-### Setup
-- run the `build.sh` file to build images. You can specify services to build by adding their name seperated by space and add the `-p` flag to push them to docker registry.
-- run `docker compose up` to start the development stack
+This project is a license plate recognition system.
 
-**Add new Alembic Revision:**
-- `docker compose run --rm db-prestart alembic revision --autogenerate -m "text"`
+## Documentation
+
+The full documentation can be found here: [https://julianbierbaum.github.io/license-plate-system/](https://julianbierbaum.github.io/license-plate-system/)
+
+## Authors
+
+- Julian Bierbaum
+- Amtmann Olivia

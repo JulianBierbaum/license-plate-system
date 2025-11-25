@@ -1,22 +1,26 @@
-class DatabaseQueryError(Exception):
+class DatabaseError(Exception):
+    """Base Database Exception"""
+    pass
+
+class DatabaseQueryError(DatabaseError):
     """Raised when a query on the database fails"""
 
     pass
 
 
-class DatabaseIntegrityError(Exception):
+class DatabaseIntegrityError(DatabaseError):
     """Raised when the database throws an integrity error"""
 
     pass
 
 
-class DuplicateEntryError(Exception):
+class DuplicateEntryError(DatabaseError):
     """Raised when an entry with the same name is already in the db"""
 
     pass
 
 
-class MissingEntryError(Exception):
+class MissingEntryError(DatabaseError):
     """Raised when an entry is not found"""
 
     pass

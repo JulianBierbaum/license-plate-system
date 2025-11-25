@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     api_key: str = Field(..., alias='API_KEY')
     save_images_for_debug: bool = Field(False, alias='SAVE_IMAGES_FOR_DEBUG')
     interval_seconds: int = Field(60, alias='INTERVAL_SECONDS')
+    plate_recognizer_service_url: str = Field(..., alias='PLATE_RECOGNIZER_SERVICE_URL')
 
     @property
     def db_uri(self) -> PostgresDsn:

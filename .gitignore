@@ -44,13 +44,11 @@ build/
 dist/
 wheels/
 *.egg-info
-uv.lock
 # Virtual environments
 .venv
 .ruff_cache
 
-
 .env
-package-lock.json
 snapshots
 .pytest_cache
+backups

@@ -3,17 +3,30 @@ from fastapi import APIRouter, HTTPException, status
 from src.db.session import SessionDep
 import src.handlers.database_handler as crud
 from src.exceptions.database_exceptions import (
+    DatabaseError,
     DatabaseIntegrityError,
     DatabaseQueryError,
     DuplicateEntryError,
     MissingEntryError,
 )
-import src.schemas.user_preferences as  schemas
+import src.schemas.user_preferences as schemas
 
 router = APIRouter()
 
 
-@router.post("/", response_model=schemas.UserPreference)
+def _raise_http_from_database_error(err: DatabaseError) -> None:
+    if isinstance(err, MissingEntryError):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(err))
+    if isinstance(err, (DuplicateEntryError, DatabaseIntegrityError)):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(err))
+    if isinstance(err, DatabaseQueryError):
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(err))
+
+    # Fallback for any other DatabaseError
+    raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"An unexpected database error occurred: {err}")
+
+
+@router.post('/', response_model=schemas.UserPreference)
 def create_user_preferences(db: SessionDep, entry: schemas.UserPreferencesCreate):
     """
     Create new user preferences.
@@ -27,19 +40,11 @@ def create_user_preferences(db: SessionDep, entry: schemas.UserPreferencesCreate
     """
     try:
         return crud.create_new_entry(db=db, entry=entry)
-    except DuplicateEntryError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User preferences with this name already exist",
-        )
-    except DatabaseIntegrityError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Database integrity error: {e}",
-        )
+    except DatabaseError as e:
+        _raise_http_from_database_error(e)
 
 
-@router.get("/", response_model=list[schemas.UserPreference])
+@router.get('/', response_model=list[schemas.UserPreference])
 def get_all_user_preferences(db: SessionDep):
     """
     Retrieve all user preferences records.
@@ -52,14 +57,11 @@ def get_all_user_preferences(db: SessionDep):
     """
     try:
         return crud.get_entries(db=db)
-    except DatabaseQueryError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch user preferences",
-        )
+    except DatabaseError as e:
+        _raise_http_from_database_error(e)
 
 
-@router.get("/{entry_id}", response_model=schemas.UserPreference)
+@router.get('/{entry_id}', response_model=schemas.UserPreference)
 def get_user_preferences_by_id(db: SessionDep, entry_id: int):
     """
     Retrieve user preferences by ID.
@@ -77,17 +79,14 @@ def get_user_preferences_by_id(db: SessionDep, entry_id: int):
         if not entry:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="User preferences not found",
+                detail='User preferences not found',
             )
         return entry
-    except DatabaseQueryError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch user preferences",
-        )
+    except DatabaseError as e:
+        _raise_http_from_database_error(e)
 
 
-@router.get("/by-name/{name}", response_model=schemas.UserPreference)
+@router.get('/by-name/{name}', response_model=schemas.UserPreference)
 def get_user_preferences_by_name(db: SessionDep, name: str):
     """
     Retrieve user preferences by name.
@@ -105,20 +104,15 @@ def get_user_preferences_by_name(db: SessionDep, name: str):
         if not entry:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="User preferences not found",
+                detail='User preferences not found',
             )
         return entry
-    except DatabaseQueryError:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to fetch user preferences",
-        )
+    except DatabaseError as e:
+        _raise_http_from_database_error(e)
 
 
-@router.put("/{entry_id}", response_model=schemas.UserPreference)
-def update_user_preferences(
-    db: SessionDep, entry_id: int, entry: schemas.UserPreferencesUpdate
-):
+@router.put('/{entry_id}', response_model=schemas.UserPreference)
+def update_user_preferences(db: SessionDep, entry_id: int, entry: schemas.UserPreferencesUpdate):
     """
     Update user preferences by ID.
 
@@ -132,18 +126,5 @@ def update_user_preferences(
     """
     try:
         return crud.update_entry(db=db, entry=entry, entry_id=entry_id)
-    except MissingEntryError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User preferences not found",
-        )
-    except DuplicateEntryError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User preferences with this name already exist",
-        )
-    except DatabaseIntegrityError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Database integrity error: {e}",
-        )
+    except DatabaseError as e:
+        _raise_http_from_database_error(e)

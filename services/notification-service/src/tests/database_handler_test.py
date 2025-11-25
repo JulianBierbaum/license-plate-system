@@ -1,279 +1,205 @@
-from datetime import datetime, timedelta, timezone
-from hashlib import sha256
-
 import pytest
+from sqlalchemy.orm import Session
 
-from src.enums.vehicle_orientation import VehicleOrientation
-from src.handlers.database_handler import DatabaseHandler
-from src.models.vehicle_observation import VehicleObservation
-from src.schemas.vehicle_observation import (
-    VehicleObservationCreate,
-    VehicleObservationRaw,
+from src.handlers import database_handler as db_handler
+from src.models.user_preferences import UserPreferences
+from src.schemas.user_preferences import UserPreferencesCreate, UserPreferencesUpdate
+from src.exceptions.database_exceptions import (
+    DuplicateEntryError,
+    MissingEntryError,
 )
 
 
-@pytest.fixture
-def db_handler():
-    """Fixture for DatabaseHandler instance."""
-    return DatabaseHandler()
-
-
-# --- Tests for new_observation ---
-def test_new_observation_successful_extraction(db_handler):
-    """
-    Test successful extraction of a single observation from reader_result.
-    """
-    detection_timestamp = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    reader_result = {
-        "results": [
-            {
-                "plate": "ABC1234",
-                "candidates": [{"score": 0.95}],
-                "region": {"code": "US"},
-                "vehicle": {"type": "car"},
-            }
-        ]
-    }
-
-    observations = db_handler.new_observation(reader_result, detection_timestamp)
-
-    assert len(observations) == 1
-    obs = observations[0]
-    assert obs.plate == "ABC1234"
-    assert obs.plate_score == 950
-    assert obs.country_code == "US"
-    assert obs.vehicle_type == "car"
-    assert obs.orientation == VehicleOrientation.FRONT
-    assert obs.timestamp == detection_timestamp
-
-
-def test_new_observation_empty_results(db_handler):
-    """
-    Test when reader_result has an empty 'results' list.
-    """
-    detection_timestamp = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    reader_result = {"results": []}
-
-    observations = db_handler.new_observation(reader_result, detection_timestamp)
-    assert len(observations) == 0
-
-
-def test_new_observation_multiple_observations(db_handler):
-    """
-    Test extraction of multiple observations from reader_result.
-    """
-    detection_timestamp = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    reader_result = {
-        "results": [
-            {
-                "plate": "ABC1234",
-                "candidates": [{"score": 0.95}],
-                "region": {"code": "US"},
-                "vehicle": {"type": "car"},
-            },
-            {
-                "plate": "XYZ789",
-                "candidates": [{"score": 0.88}],
-                "region": {"code": "CA"},
-                "vehicle": {"type": "truck"},
-            },
-        ]
-    }
-
-    observations = db_handler.new_observation(reader_result, detection_timestamp)
-    assert len(observations) == 2
-    assert observations[0].plate == "ABC1234"
-    assert observations[1].plate == "XYZ789"
-
-
-# --- Tests for hash_plate ---
-def test_hash_plate_standard(db_handler):
-    """
-    Test hashing a standard plate.
-    """
-    raw_obs = VehicleObservationRaw(
-        plate="TEST123",
-        plate_score=900,
-        country_code="US",
-        vehicle_type="car",
-        orientation=VehicleOrientation.FRONT,
-        timestamp=datetime.now(),
+def create_user_preference_entry(
+    db: Session, name: str, email: str, receive_alerts: bool = True, receive_updates: bool = False
+) -> UserPreferences:
+    """Helper to create a UserPreferences entry for testing."""
+    user_pref = UserPreferencesCreate(
+        name=name,
+        email=email,
+        receive_alerts=receive_alerts,
+        receive_updates=receive_updates,
     )
-    hashed_obs = db_handler.hash_plate(raw_obs)
-    expected_hash = sha256(b"test123").digest()
-
-    assert hashed_obs.plate_hash == expected_hash
-    assert hashed_obs.plate_score == raw_obs.plate_score
-    assert hashed_obs.country_code == raw_obs.country_code
-    assert hashed_obs.vehicle_type == raw_obs.vehicle_type
-    assert hashed_obs.orientation == raw_obs.orientation
-    assert hashed_obs.timestamp == raw_obs.timestamp
+    return db_handler.create_new_entry(db, user_pref)
 
 
-def test_hash_plate_with_spaces_and_case(db_handler):
+def test_create_new_entry_successful(db: Session):
     """
-    Test hashing a plate with leading/trailing spaces and different casing.
+    Test successful creation of a new user preference entry.
     """
-    raw_obs = VehicleObservationRaw(
-        plate="  AbC 456  ",
-        plate_score=900,
-        country_code="US",
-        vehicle_type="car",
-        orientation=VehicleOrientation.FRONT,
-        timestamp=datetime.now(),
-    )
-    hashed_obs = db_handler.hash_plate(raw_obs)
-    expected_hash = sha256(b"abc 456").digest()  # Stripped and lowercased
-
-    assert hashed_obs.plate_hash == expected_hash
-
-
-def test_hash_plate_empty_string(db_handler):
-    """
-    Test hashing an empty plate string.
-    """
-    raw_obs = VehicleObservationRaw(
-        plate="",
-        plate_score=900,
-        country_code="US",
-        vehicle_type="car",
-        orientation=VehicleOrientation.FRONT,
-        timestamp=datetime.now(),
-    )
-    hashed_obs = db_handler.hash_plate(raw_obs)
-    expected_hash = sha256(b"").digest()
-
-    assert hashed_obs.plate_hash == expected_hash
-
-
-# --- Tests for check_for_duplicates ---
-def create_hashed_observation(
-    plate: str, timestamp: datetime
-) -> VehicleObservationCreate:
-    """Helper to create a VehicleObservationCreate object for testing."""
-    return VehicleObservationCreate(
-        plate_hash=sha256(plate.strip().lower().encode("utf-8")).digest(),
-        plate_score=800,
-        country_code="DE",
-        vehicle_type="bus",
-        orientation=VehicleOrientation.REAR,
-        timestamp=timestamp,
+    name = 'test_user'
+    email = 'test@example.com'
+    user_pref_in = UserPreferencesCreate(
+        name=name,
+        email=email,
+        receive_alerts=True,
+        receive_updates=False,
     )
 
+    created_pref = db_handler.create_new_entry(db, user_pref_in)
 
-def test_check_for_duplicates_no_duplicate(db_handler, db):
-    """
-    Test no duplicate found when no matching observation exists.
-    """
-    current_time = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    obs_to_check = create_hashed_observation("NEWPLATE", current_time)
+    assert created_pref is not None
+    assert created_pref.id is not None
+    assert created_pref.name == name
+    assert created_pref.email == email
+    assert created_pref.receive_alerts is True
+    assert created_pref.receive_updates is False
 
-    # Insert an unrelated observation
-    db_handler.create_observation_entry(
-        db, create_hashed_observation("OTHERPLATE", current_time - timedelta(minutes=5))
+    retrieved_pref = db.query(UserPreferences).filter_by(id=created_pref.id).first()
+    assert retrieved_pref is not None
+    assert retrieved_pref.name == name
+
+
+def test_create_new_entry_duplicate_name(db: Session):
+    """
+    Test that creating an entry with a duplicate name raises DuplicateEntryError.
+    """
+    name = 'duplicate_user'
+    create_user_preference_entry(db, name, 'first@example.com')
+
+    with pytest.raises(DuplicateEntryError):
+        create_user_preference_entry(db, name, 'second@example.com')
+
+
+def test_create_new_entry_duplicate_email(db: Session):
+    """
+    Test that creating an entry with a duplicate email raises DuplicateEntryError.
+    """
+    email = 'duplicate@example.com'
+    create_user_preference_entry(db, 'first_user', email)
+
+    with pytest.raises(DuplicateEntryError):
+        create_user_preference_entry(db, 'second_user', email)
+
+
+def test_get_entry_found(db: Session):
+    """
+    Test retrieving an existing entry by ID.
+    """
+    created_pref = create_user_preference_entry(db, 'get_user', 'get@example.com')
+    retrieved_pref = db_handler.get_entry(db, created_pref.id)
+
+    assert retrieved_pref is not None
+    assert retrieved_pref.id == created_pref.id
+    assert retrieved_pref.name == 'get_user'
+
+
+def test_get_entry_not_found(db: Session):
+    """
+    Test that retrieving a non-existent entry by ID returns None.
+    """
+    retrieved_pref = db_handler.get_entry(db, 9999)
+    assert retrieved_pref is None
+
+
+def test_get_entry_by_name_found(db: Session):
+    """
+    Test retrieving an existing entry by name.
+    """
+    name = 'find_by_name'
+    create_user_preference_entry(db, name, 'find_by_name@example.com')
+    retrieved_pref = db_handler.get_entry_by_name(db, name)
+
+    assert retrieved_pref is not None
+    assert retrieved_pref.name == name
+
+
+def test_get_entry_by_name_not_found(db: Session):
+    """
+    Test that retrieving a non-existent entry by name returns None.
+    """
+    retrieved_pref = db_handler.get_entry_by_name(db, 'non_existent_user')
+    assert retrieved_pref is None
+
+
+def test_get_entry_by_email_found(db: Session):
+    """
+    Test retrieving an existing entry by email.
+    """
+    email = 'find_by_email@example.com'
+    create_user_preference_entry(db, 'find_by_email_user', email)
+    retrieved_pref = db_handler.get_entry_by_email(db, email)
+
+    assert retrieved_pref is not None
+    assert retrieved_pref.email == email
+
+
+def test_get_entry_by_email_not_found(db: Session):
+    """
+    Test that retrieving a non-existent entry by email returns None.
+    """
+    retrieved_pref = db_handler.get_entry_by_email(db, 'non_existent@example.com')
+    assert retrieved_pref is None
+
+
+def test_get_entries_multiple(db: Session):
+    """
+    Test retrieving all user preference entries.
+    """
+    create_user_preference_entry(db, 'user1', 'user1@example.com')
+    create_user_preference_entry(db, 'user2', 'user2@example.com')
+
+    all_prefs = db_handler.get_entries(db)
+    assert len(all_prefs) == 2
+
+
+def test_get_entries_empty(db: Session):
+    """
+    Test retrieving entries when the table is empty.
+    """
+    all_prefs = db_handler.get_entries(db)
+    assert len(all_prefs) == 0
+
+
+def test_update_entry_successful(db: Session):
+    """
+    Test successfully updating an existing user preference entry.
+    """
+    created_pref = create_user_preference_entry(db, 'update_user', 'update@example.com')
+    update_data = UserPreferencesUpdate(
+        name='updated_user_name',
+        email='updated_email@example.com',
+        receive_alerts=False,
     )
 
-    is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
-    assert not is_duplicate
+    updated_pref = db_handler.update_entry(db, update_data, created_pref.id)
+
+    assert updated_pref is not None
+    assert updated_pref.id == created_pref.id
+    assert updated_pref.name == 'updated_user_name'
+    assert updated_pref.email == 'updated_email@example.com'
+    assert updated_pref.receive_alerts is False
+    assert updated_pref.receive_updates is False
 
 
-def test_check_for_duplicates_exact_duplicate_within_window(db_handler, db):
+def test_update_entry_not_found(db: Session):
     """
-    Test duplicate found when an exact matching observation exists within 1 minute.
+    Test that updating a non-existent entry raises MissingEntryError.
     """
-    current_time = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    plate_to_check = "DUPLICATE"
-    obs_to_check = create_hashed_observation(plate_to_check, current_time)
-
-    # Insert a duplicate observation 30 seconds ago
-    existing_obs_time = current_time - timedelta(seconds=30)
-    db_handler.create_observation_entry(
-        db, create_hashed_observation(plate_to_check, existing_obs_time)
-    )
-
-    is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
-    assert is_duplicate
+    update_data = UserPreferencesUpdate(name='any_name')
+    with pytest.raises(MissingEntryError):
+        db_handler.update_entry(db, update_data, 9999)
 
 
-def test_check_for_duplicates_duplicate_outside_window_older(db_handler, db):
+def test_update_entry_duplicate_name(db: Session):
     """
-    Test no duplicate found when a matching observation exists but is older than 1 minute.
+    Test that updating an entry to a name that already exists raises DuplicateEntryError.
     """
-    current_time = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    plate_to_check = "OLDPLATE"
-    obs_to_check = create_hashed_observation(plate_to_check, current_time)
+    create_user_preference_entry(db, 'existing_name', 'existing@example.com')
+    user_to_update = create_user_preference_entry(db, 'user_to_update', 'update@example.com')
 
-    # Insert an observation 2 minutes ago
-    existing_obs_time = current_time - timedelta(minutes=2)
-    db_handler.create_observation_entry(
-        db, create_hashed_observation(plate_to_check, existing_obs_time)
-    )
-
-    is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
-    assert not is_duplicate
+    update_data = UserPreferencesUpdate(name='existing_name')
+    with pytest.raises(DuplicateEntryError):
+        db_handler.update_entry(db, update_data, user_to_update.id)
 
 
-def test_check_for_duplicates_duplicate_outside_window_newer(db_handler, db):
+def test_update_entry_duplicate_email(db: Session):
     """
-    Test no duplicate found when a matching observation exists but is newer (in the "future"
-    relative to current_detection_time), which shouldn't count based on the query.
+    Test that updating an entry to an email that already exists raises DuplicateEntryError.
     """
-    current_time = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    plate_to_check = "FUTUREPLATE"
-    obs_to_check = create_hashed_observation(plate_to_check, current_time)
+    create_user_preference_entry(db, 'user1', 'existing_email@example.com')
+    user_to_update = create_user_preference_entry(db, 'user2', 'email_to_update@example.com')
 
-    # Insert an observation 30 seconds in the future
-    existing_obs_time = current_time + timedelta(seconds=30)
-    db_handler.create_observation_entry(
-        db, create_hashed_observation(plate_to_check, existing_obs_time)
-    )
-
-    is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
-    assert not is_duplicate
-
-
-def test_check_for_duplicates_different_plate_same_time(db_handler, db):
-    """
-    Test no duplicate found when observations have different plate hashes.
-    """
-    current_time = datetime(2025, 1, 1, 10, 0, 0, tzinfo=timezone.utc)
-    obs_to_check = create_hashed_observation("PLATE1", current_time)
-
-    # Insert a different plate at the same time
-    db_handler.create_observation_entry(
-        db, create_hashed_observation("PLATE2", current_time)
-    )
-
-    is_duplicate = db_handler.check_for_duplicates(db, obs_to_check, current_time)
-    assert not is_duplicate
-
-
-# --- Tests for create_observation_entry ---
-def test_create_observation_entry_successful(db_handler, db):
-    """
-    Test successful creation of a new observation entry.
-    """
-    hashed_obs = VehicleObservationCreate(
-        plate_hash=sha256(b"TESTPLATE").digest(),
-        plate_score=999,
-        country_code="DE",
-        vehicle_type="motorcycle",
-        orientation=VehicleOrientation.FRONT,
-        timestamp=datetime.now(tz=timezone.utc),
-    )
-
-    created_obs = db_handler.create_observation_entry(db, hashed_obs)
-
-    assert created_obs is not None
-    assert created_obs.id is not None
-    assert created_obs.plate_hash == hashed_obs.plate_hash
-    assert created_obs.plate_score == hashed_obs.plate_score
-    assert created_obs.country_code == hashed_obs.country_code
-    assert created_obs.vehicle_type == hashed_obs.vehicle_type
-    assert created_obs.orientation == hashed_obs.orientation
-    assert created_obs.timestamp == hashed_obs.timestamp
-
-    # Verify that the observation exists in the database
-    retrieved_obs = db.query(VehicleObservation).filter_by(id=created_obs.id).first()
-    assert retrieved_obs is not None
-    assert retrieved_obs.plate_hash == created_obs.plate_hash
+    update_data = UserPreferencesUpdate(email='existing_email@example.com')
+    with pytest.raises(DuplicateEntryError):
+        db_handler.update_entry(db, update_data, user_to_update.id)
