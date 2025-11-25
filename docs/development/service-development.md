@@ -29,6 +29,7 @@ If your service requires environment variables:
 You should *NOT* edit the `build.sh` script if you dont explicitly need to. 
 
 The `build.sh` script automatically iterates through directories in `services/`. It will build and push your service if it detects the following files:
+
 *   `Dockerfile`
 *   `pyproject.toml`
 *   `uv.lock`
@@ -37,6 +38,7 @@ The `build.sh` script automatically iterates through directories in `services/`.
 
 When adding a new service, you **MUST** update the GitHub Actions workflow at `.github/workflows/ci-cd.yaml`.
 Add steps for:
+
 *   **Linting**: Run `ruff check` and `ruff format` on your service.
 *   **Testing**: Run `pytest` for your service.
 
