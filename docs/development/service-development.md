@@ -20,8 +20,9 @@ When adding a new service, it must be added to **BOTH** `docker-compose.dev.yaml
 ## Environment Variables
 
 If your service requires environment variables:
+
 1.  Add them to your local `.env` file.
-2.  Add them to `.env.example` so other developers know they are required.
+2.  Add them to `.env.example` so other developers know they are required. But make sure to censor all sensitive variables in this file because its publicly viewable.
 
 ## Build Script
 
