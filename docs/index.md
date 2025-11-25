@@ -26,6 +26,10 @@ The system is designed as a modular, containerized application stack.
 
 For detailed information on setting up a development environment, running tests, and contributing to the project, please see the **Development** section.
 
+!!! note "Operating System Recommendation"
+    This system is developed for a **Linux** environment. It is strongly recommended to develop on a **Unix-based system** (Linux or macOS). Windows users may encounter issues with line endings (CRLF vs LF) in scripts and configuration files, which can prevent the system from executing correctly.
+
+
 ## Operations
 
 The **Operations** section provides guidance on essential maintenance tasks, including:
