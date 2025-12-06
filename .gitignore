@@ -10,6 +10,8 @@ node_modules
 !.yarn/releases
 !.yarn/versions
 
+project_overview.md
+
 # testing
 coverage
 
