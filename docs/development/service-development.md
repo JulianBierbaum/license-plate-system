@@ -15,7 +15,7 @@ New services should use the standard `uv` Dockerfile pattern found in existing s
 When adding a new service, it must be added to **BOTH** `docker-compose.dev.yaml` and `docker-compose.prod.yaml`.
 
 *   **Development (`docker-compose.dev.yaml`)**: Use the `build` context and mount volumes (e.g., `./services/<service>/src:/app/src`) to enable hot-reloading during development.
-*   **Production (`docker-compose.prod.yaml`)**: Use the built image (e.g., `image: julianbierbaum/license-plate-system:<service>`) and appropriate restart policies (`restart: on-failure`).
+*   **Production (`docker-compose.prod.yaml`)**: Use the built image (e.g., `image: julianbierbaum/license-plate-system:<service>`) and appropriate restart policies (`restart: unless-stopped`).
 
 ## Environment Variables
 
