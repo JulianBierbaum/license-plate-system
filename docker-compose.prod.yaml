@@ -14,7 +14,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   auth-service:
     image: julianbierbaum/license-plate-system:auth-service
@@ -26,7 +26,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   data-collection-service:
     image: julianbierbaum/license-plate-system:data-collection-service
@@ -58,7 +58,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   notification-service:
     image: julianbierbaum/license-plate-system:notification-service
@@ -83,7 +83,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   web-service:
     image: julianbierbaum/license-plate-system:web-service
@@ -96,7 +96,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   plate-recognizer:
     image: platerecognizer/alpr:latest
@@ -114,7 +114,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   db-prestart:
     image: julianbierbaum/license-plate-system:db-prestart
@@ -150,7 +150,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
-    restart: on-failure
+    restart: unless-stopped
 
   grafana:
     image: julianbierbaum/license-plate-system:grafana
@@ -168,7 +168,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
   postgres-backup:
     image: julianbierbaum/license-plate-system:db-backup
@@ -191,7 +191,7 @@ services:
     depends_on:
       db-prestart:
         condition: service_completed_successfully
-    restart: on-failure
+    restart: unless-stopped
 
 volumes:
   postgres_data:
