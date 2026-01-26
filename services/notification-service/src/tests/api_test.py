@@ -138,3 +138,36 @@ def test_update_user_preferences_duplicate_name(client: TestClient, db: Session)
         json={'name': 'existing_name_for_put'},
     )
     assert response.status_code == 400
+
+
+def test_delete_user_preferences_success(client: TestClient, db: Session):
+    """
+    Test successful deletion of user preferences.
+    """
+    user_pref = create_user_preference_entry(db, 'user_to_delete', 'delete_me@example.com')
+    response = client.delete(f'/api/user_preferences/{user_pref.id}')
+    assert response.status_code == 204
+
+    # Verify it's gone
+    response = client.get(f'/api/user_preferences/{user_pref.id}')
+    assert response.status_code == 404
+
+
+def test_delete_user_preferences_not_found(client: TestClient):
+    """
+    Test that deleting a non-existent user returns 404.
+    """
+    response = client.delete('/api/user_preferences/99999')
+    assert response.status_code == 404
+
+
+def test_create_user_preferences_duplicate_email(client: TestClient, db: Session):
+    """
+    Test that creating a user with a duplicate email via API fails.
+    """
+    create_user_preference_entry(db, 'first_user_email', 'duplicate@example.com')
+    response = client.post(
+        '/api/user_preferences/',
+        json={'name': 'second_user_email', 'email': 'duplicate@example.com'},
+    )
+    assert response.status_code == 400

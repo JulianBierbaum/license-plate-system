@@ -34,12 +34,18 @@ def db():
 def client(db):
     """
     Provides a FastAPI test client configured to use the `db` fixture's session.
+    Auth is bypassed for testing by overriding the verify_api_key dependency.
     """
+    from src.api.auth import verify_api_key
 
     def override_get_db():
         yield db
 
+    async def override_verify_api_key():
+        return 'test-api-key'
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[verify_api_key] = override_verify_api_key
     try:
         yield TestClient(app)
     finally:

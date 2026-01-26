@@ -43,7 +43,13 @@ Submit vehicle detection data.
 
 ## Notification Service
 
-The **Notification Service** manages user preferences for notifications.
+The **Notification Service** manages user preferences for notifications and sends email alerts/updates.
+
+!!! warning "Authentication Required"
+    All notification service endpoints (except `/health`) require an API key. Include the `Authorization` header with your API key:
+    ```
+    Authorization: your-api-key-here
+    ```
 
 #### `GET /health`
 
@@ -57,9 +63,11 @@ Returns a `200 OK` with a simple JSON body.
 }
 ```
 
+---
+
 ### User Preferences
 
-#### `POST /user_preferences/`
+#### `POST /api/user_preferences/`
 
 Create new user preferences.
 
@@ -68,24 +76,26 @@ Create new user preferences.
     {
       "name": "John Doe",
       "email": "john@example.com",
-      "notifications_enabled": true
+      "receive_alerts": true,
+      "receive_updates": false
     }
     ```
 
     **Fields**
 
-    | Name                   | Type  | Description                                   |
-    |------------------------|-------|-----------------------------------------------|
-    | `name`                 | string | The name of the user.                        |
-    | `email`                | string | The email address of the user.               |
-    | `notifications_enabled`| bool   | Whether notifications are enabled.           |
+    | Name             | Type   | Description                                |
+    |------------------|--------|--------------------------------------------|
+    | `name`           | string | The name of the user (5-50 chars).         |
+    | `email`          | string | The email address of the user.             |
+    | `receive_alerts` | bool   | Whether the user receives alert emails.    |
+    | `receive_updates`| bool   | Whether the user receives update emails.   |
 
 **Response:**  
 Returns the newly created user preferences record.
 
 ---
 
-#### `GET /user_preferences/`
+#### `GET /api/user_preferences/`
 
 Retrieve all user preferences records.
 
@@ -94,7 +104,7 @@ Returns a list of all user preferences records.
 
 ---
 
-#### `GET /user_preferences/{entry_id}`
+#### `GET /api/user_preferences/{entry_id}`
 
 Retrieve user preferences by ID.
 
@@ -103,11 +113,11 @@ Retrieve user preferences by ID.
 | `entry_id` | int  | The ID of the user preferences to retrieve. |
 
 **Response:**  
-Returns the requested user preferences record.
+Returns the requested user preferences record, or `404` if not found.
 
 ---
 
-#### `GET /user_preferences/by-name/{name}`
+#### `GET /api/user_preferences/by-name/{name}`
 
 Retrieve user preferences by name.
 
@@ -116,11 +126,11 @@ Retrieve user preferences by name.
 | `name` | string | The name of the user to retrieve preferences for. |
 
 **Response:**  
-Returns the requested user preferences record.
+Returns the requested user preferences record, or `404` if not found.
 
 ---
 
-#### `PUT /user_preferences/{entry_id}`
+#### `PUT /api/user_preferences/{entry_id}`
 
 Update user preferences by ID.
 
@@ -133,7 +143,8 @@ Update user preferences by ID.
     {
       "name": "Jane Doe",
       "email": "jane@example.com",
-      "notifications_enabled": false
+      "receive_alerts": false,
+      "receive_updates": true
     }
     ```
 
@@ -143,7 +154,63 @@ Update user preferences by ID.
     |------|------|-------------|
     | `name` | string | The name of the user. |
     | `email` | string | The email address of the user. |
-    | `notifications_enabled` | bool | Whether notifications are enabled. |
+    | `receive_alerts` | bool | Whether the user receives alerts. |
+    | `receive_updates` | bool | Whether the user receives updates. |
 
 **Response:**  
-Returns the updated user preferences record.
+Returns the updated user preferences record, or `404` if not found.
+
+---
+
+#### `DELETE /api/user_preferences/{entry_id}`
+
+Delete user preferences by ID.
+
+| Parameter | Type | Description |
+|------------|------|-------------|
+| `entry_id` | int  | The ID of the user preferences to delete. |
+
+**Response:**  
+Returns `204 No Content` on success, or `404` if not found.
+
+---
+
+### Notifications
+
+#### `POST /api/notifications/send`
+
+Send a notification to users based on their preferences.
+
+??? example "Request Body"
+    ```json
+    {
+      "notification_type": "alert",
+      "subject": "Security Alert",
+      "body": "Unauthorized vehicle detected",
+      "recipient_names": ["security_team"],
+      "html": false
+    }
+    ```
+
+    **Fields**
+
+    | Name | Type | Required | Description |
+    |------|------|----------|-------------|
+    | `notification_type` | string | Yes | Either `"alert"` or `"update"`. Determines which users receive the notification. |
+    | `subject` | string | Yes | Email subject (max 200 chars). |
+    | `body` | string | Yes | Email body content. |
+    | `recipient_names` | list | No | Optional list of specific usernames to send to. If omitted, sends to all users with matching preference. |
+    | `html` | bool | No | If `true`, send body as HTML. Defaults to `false`. |
+
+??? example "Response"
+    ```json
+    {
+      "total_recipients": 2,
+      "successful": 2,
+      "failed": 0,
+      "results": [
+        {"email": "user1@example.com", "success": true},
+        {"email": "user2@example.com", "success": true}
+      ]
+    }
+    ```

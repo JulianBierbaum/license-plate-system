@@ -49,7 +49,9 @@ The system is configured using environment variables. These variables are stored
 *   `NOTIFICATION_SCHEMA`: The database schema for the notification service.
 *   `ANALYTICS_SERVICE_URL`: The URL of the analytics service.
 *   `SENDER_ADDRESS`: The email address to send notifications from.
-*   `SMTP_RELAY_ADDRESS`: The IP of the SMTP open mail relay.
+*   `SMTP_RELAY_ADDRESS`: The IP address of the SMTP open mail relay.
+*   `SMTP_PORT`: The SMTP port (optional, defaults to 25).
+*   `NOTIFICATION_API_KEY`: API key for authenticating requests to the notification service.
 
 ### Web Service
 

@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     smtp_relay_host: str = Field(..., alias='SMTP_RELAY_ADDRESS')
     smtp_port: int = Field(25, alias='SMTP_PORT')
 
+    # API Key for service authentication
+    api_key: str = Field(..., alias='NOTIFICATION_API_KEY')
+
     @property
     def db_uri(self) -> PostgresDsn:
         """Constructs the PostgreSQL connection URI."""

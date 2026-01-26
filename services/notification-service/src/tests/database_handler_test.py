@@ -203,3 +203,70 @@ def test_update_entry_duplicate_email(db: Session):
     update_data = UserPreferencesUpdate(email='existing_email@example.com')
     with pytest.raises(DuplicateEntryError):
         db_handler.update_entry(db, update_data, user_to_update.id)
+
+
+def test_delete_entry_successful(db: Session):
+    """
+    Test successfully deleting a user preference entry.
+    """
+    created_pref = create_user_preference_entry(db, 'delete_user', 'delete@example.com')
+    result = db_handler.delete_entry(db, created_pref.id)
+
+    assert result is True
+    assert db_handler.get_entry(db, created_pref.id) is None
+
+
+def test_delete_entry_not_found(db: Session):
+    """
+    Test that deleting a non-existent entry raises MissingEntryError.
+    """
+    with pytest.raises(MissingEntryError):
+        db_handler.delete_entry(db, 9999)
+
+
+def test_get_entries_by_preference_alerts(db: Session):
+    """
+    Test filtering entries by receive_alerts preference.
+    """
+    create_user_preference_entry(db, 'alert_user', 'alert@example.com', receive_alerts=True)
+    create_user_preference_entry(db, 'no_alert_user', 'noalert@example.com', receive_alerts=False)
+
+    alert_users = db_handler.get_entries_by_preference(db, receive_alerts=True)
+    assert len(alert_users) == 1
+    assert alert_users[0].name == 'alert_user'
+
+
+def test_get_entries_by_preference_updates(db: Session):
+    """
+    Test filtering entries by receive_updates preference.
+    """
+    create_user_preference_entry(db, 'update_user', 'update@example.com', receive_updates=True)
+    create_user_preference_entry(db, 'no_update_user', 'noupdate@example.com', receive_updates=False)
+
+    update_users = db_handler.get_entries_by_preference(db, receive_updates=True)
+    assert len(update_users) == 1
+    assert update_users[0].name == 'update_user'
+
+
+def test_get_entries_by_names(db: Session):
+    """
+    Test retrieving entries by a list of names.
+    """
+    create_user_preference_entry(db, 'user_one', 'one@example.com')
+    create_user_preference_entry(db, 'user_two', 'two@example.com')
+    create_user_preference_entry(db, 'user_three', 'three@example.com')
+
+    found = db_handler.get_entries_by_names(db, ['user_one', 'user_three'])
+    assert len(found) == 2
+    names = [u.name for u in found]
+    assert 'user_one' in names
+    assert 'user_three' in names
+    assert 'user_two' not in names
+
+
+def test_get_entries_by_names_empty(db: Session):
+    """
+    Test that searching for non-existent names returns empty list.
+    """
+    found = db_handler.get_entries_by_names(db, ['nonexistent1', 'nonexistent2'])
+    assert len(found) == 0

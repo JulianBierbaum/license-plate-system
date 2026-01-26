@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from src.api.auth import verify_api_key
 from src.db.session import SessionDep
 import src.handlers.database_handler as crud
 from src.handlers.email_handler import email_handler
 from src.exceptions.database_exceptions import DatabaseError
 import src.schemas.notification as schemas
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(verify_api_key)])
 
 
 @router.post('/send', response_model=schemas.NotificationResponse)
