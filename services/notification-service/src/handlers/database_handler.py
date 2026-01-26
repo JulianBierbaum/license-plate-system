@@ -171,3 +171,82 @@ def update_entry(db: Session, entry: UserPreferencesUpdate, entry_id: int) -> Us
     except SQLAlchemyError as e:
         db.rollback()
         raise DatabaseIntegrityError(f'Failed to update user entry: {e}') from e
+
+
+def delete_entry(db: Session, entry_id: int) -> bool:
+    """Delete a user preferences entry
+
+    Args:
+        db (Session): db session
+        entry_id (int): the id of the entry to delete
+
+    Raises:
+        MissingEntryError: raised if no entry with the specified id exists
+        DatabaseIntegrityError: raised if the delete fails
+
+    Returns:
+        bool: True if deletion was successful
+    """
+    db_entry = get_entry(db=db, entry_id=entry_id)
+    if not db_entry:
+        raise MissingEntryError('No entry with the specified id found')
+
+    try:
+        db.delete(db_entry)
+        db.commit()
+        return True
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise DatabaseIntegrityError(f'Failed to delete user entry: {e}') from e
+
+
+def get_entries_by_preference(
+    db: Session, receive_alerts: bool | None = None, receive_updates: bool | None = None
+) -> list[UserPreferences]:
+    """Get user preferences filtered by notification preferences
+
+    Args:
+        db (Session): db session
+        receive_alerts (bool | None): filter by receive_alerts preference
+        receive_updates (bool | None): filter by receive_updates preference
+
+    Raises:
+        DatabaseQueryError: raised if the query fails
+
+    Returns:
+        list[UserPreferences]: list of matching entries
+    """
+    try:
+        stmt = select(UserPreferences)
+
+        if receive_alerts is not None:
+            stmt = stmt.where(UserPreferences.receive_alerts == receive_alerts)
+
+        if receive_updates is not None:
+            stmt = stmt.where(UserPreferences.receive_updates == receive_updates)
+
+        return db.execute(stmt).scalars().all()
+    except SQLAlchemyError as e:
+        raise DatabaseQueryError(f'Failed to fetch user preferences by preference: {e}') from e
+
+
+def get_entries_by_names(db: Session, names: list[str]) -> list[UserPreferences]:
+    """Get user preferences for specific users by name
+
+    Args:
+        db (Session): db session
+        names (list[str]): list of user names to find
+
+    Raises:
+        DatabaseQueryError: raised if the query fails
+
+    Returns:
+        list[UserPreferences]: list of matching entries
+    """
+    try:
+        # Normalize names to lowercase for comparison
+        normalized_names = [name.lower() for name in names]
+        stmt = select(UserPreferences).where(UserPreferences.name.in_(normalized_names))
+        return db.execute(stmt).scalars().all()
+    except SQLAlchemyError as e:
+        raise DatabaseQueryError(f'Failed to fetch user preferences by names: {e}') from e

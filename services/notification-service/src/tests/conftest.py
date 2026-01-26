@@ -45,3 +45,15 @@ def client(db):
     finally:
         # Clear overrides to ensure subsequent tests don't use this override
         app.dependency_overrides.clear()
+
+
+@pytest.fixture(scope='function')
+def email_handler():
+    """Create an EmailHandler with test config"""
+    from src.handlers.email_handler import EmailHandler
+
+    return EmailHandler(
+        smtp_host='test.smtp.local',
+        smtp_port=25,
+        sender_address='test@example.com',
+    )

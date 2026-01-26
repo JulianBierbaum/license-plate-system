@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     analytics_service_url: str = Field(..., alias='ANALYTICS_SERVICE_URL')
     sender_address: str = Field(..., alias='SENDER_ADDRESS')
 
+    # SMTP settings
+    smtp_relay_host: str = Field(..., alias='SMTP_RELAY_ADDRESS')
+    smtp_port: int = Field(25, alias='SMTP_PORT')
+
     @property
     def db_uri(self) -> PostgresDsn:
         """Constructs the PostgreSQL connection URI."""

@@ -1,6 +1,8 @@
 class DatabaseError(Exception):
     """Base Database Exception"""
+
     pass
+
 
 class DatabaseQueryError(DatabaseError):
     """Raised when a query on the database fails"""
