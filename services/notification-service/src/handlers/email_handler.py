@@ -81,33 +81,35 @@ class EmailHandler:
 
         return results
 
-    def send_alert(self, recipients: list[str], subject: str, body: str) -> dict[str, bool]:
+    def send_alert(self, recipients: list[str], subject: str, body: str, html: bool = False) -> dict[str, bool]:
         """Send alert notification to recipients
 
         Args:
             recipients: list of email addresses
             subject: alert subject
             body: alert body
+            html: if True, send as HTML email
 
         Returns:
             dict mapping email addresses to success status
         """
         prefixed_subject = f'[ALERT] {subject}'
-        return self.send_bulk_email(recipients, prefixed_subject, body)
+        return self.send_bulk_email(recipients, prefixed_subject, body, html=html)
 
-    def send_update(self, recipients: list[str], subject: str, body: str) -> dict[str, bool]:
+    def send_update(self, recipients: list[str], subject: str, body: str, html: bool = False) -> dict[str, bool]:
         """Send update notification to recipients
 
         Args:
             recipients: list of email addresses
             subject: update subject
             body: update body
+            html: if True, send as HTML email
 
         Returns:
             dict mapping email addresses to success status
         """
         prefixed_subject = f'[UPDATE] {subject}'
-        return self.send_bulk_email(recipients, prefixed_subject, body)
+        return self.send_bulk_email(recipients, prefixed_subject, body, html=html)
 
 
 # Default handler instance
