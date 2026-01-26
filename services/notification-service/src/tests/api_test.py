@@ -13,7 +13,7 @@ def create_user_preference_entry(db: Session, name: str, email: str) -> UserPref
         receive_updates=False,
     )
     db.add(user_pref)
-    db.flush() 
+    db.flush()
     db.refresh(user_pref)
     return user_pref
 
@@ -60,7 +60,6 @@ def test_get_all_user_preferences(client: TestClient, db: Session):
     assert len(data) >= 2
 
 
-
 def test_get_user_preferences_by_id_success(client: TestClient, db: Session):
     """
     Test retrieving a specific user preference by ID via API.
@@ -78,7 +77,6 @@ def test_get_user_preferences_by_id_not_found(client: TestClient):
     """
     response = client.get('/api/user_preferences/99999')
     assert response.status_code == 404
-
 
 
 def test_get_user_preferences_by_name_success(client: TestClient, db: Session):
@@ -99,7 +97,6 @@ def test_get_user_preferences_by_name_not_found(client: TestClient):
     """
     response = client.get('/api/user_preferences/by-name/nonexistent')
     assert response.status_code == 404
-
 
 
 def test_update_user_preferences_success(client: TestClient, db: Session):

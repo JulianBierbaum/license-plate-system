@@ -86,6 +86,7 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
       ANALYTICS_SERVICE_URL: ${ANALYTICS_SERVICE_URL}
       SENDER_ADDRESS: ${SENDER_ADDRESS}
+      SMTP_RELAY_ADDRESS: ${SMTP_RELAY_ADDRESS}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 5s
