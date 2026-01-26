@@ -51,9 +51,9 @@ def send_notification(db: SessionDep, request: schemas.NotificationRequest):
         recipients = [user.email for user in users]
 
         if request.notification_type == 'alert':
-            results = email_handler.send_alert(recipients, request.subject, request.body)
+            results = email_handler.send_alert(recipients, request.subject, request.body, html=request.html)
         else:
-            results = email_handler.send_update(recipients, request.subject, request.body)
+            results = email_handler.send_update(recipients, request.subject, request.body, html=request.html)
 
         result_list = [
             schemas.NotificationRecipientResult(email=email, success=success) for email, success in results.items()

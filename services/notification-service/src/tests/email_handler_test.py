@@ -66,7 +66,7 @@ class TestEmailHandler:
                 body='Alert body',
             )
 
-            mock_bulk.assert_called_once_with(['test@example.com'], '[ALERT] Important', 'Alert body')
+            mock_bulk.assert_called_once_with(['test@example.com'], '[ALERT] Important', 'Alert body', html=False)
 
     def test_send_update_adds_prefix(self, email_handler):
         """Test that send_update adds [UPDATE] prefix"""
@@ -79,7 +79,7 @@ class TestEmailHandler:
                 body='Update body',
             )
 
-            mock_bulk.assert_called_once_with(['test@example.com'], '[UPDATE] News', 'Update body')
+            mock_bulk.assert_called_once_with(['test@example.com'], '[UPDATE] News', 'Update body', html=False)
 
     def test_send_html_email(self, email_handler):
         """Test sending HTML email"""
