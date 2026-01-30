@@ -9,9 +9,7 @@ class NotificationRequest(BaseModel):
     notification_type: Literal['alert', 'update'] = Field(..., description="Type of notification: 'alert' or 'update'")
     subject: str = Field(..., min_length=1, max_length=200, description='Email subject')
     body: str = Field(..., min_length=1, description='Email body content')
-    recipient_names: list[str] | None = Field(
-        default=None, description='Optional list of specific user names to send to.'
-    )
+    recipients: list[str] | None = Field(default=None, description='Optional list of email addresses to send to.')
     html: bool = Field(default=False, description='If true, send body as HTML')
 
 

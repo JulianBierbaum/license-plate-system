@@ -89,7 +89,7 @@ class TestSendNotification:
                     'notification_type': 'alert',
                     'subject': 'Targeted Alert',
                     'body': 'This is for specific users',
-                    'recipient_names': ['target_user'],
+                    'recipients': ['target@example.com'],
                 },
             )
 
@@ -157,7 +157,7 @@ class TestSendNotification:
                     'notification_type': 'update',
                     'subject': 'Targeted Update',
                     'body': 'Specific update',
-                    'recipient_names': ['update_target'],
+                    'recipients': ['updatetarget@example.com'],
                 },
             )
 

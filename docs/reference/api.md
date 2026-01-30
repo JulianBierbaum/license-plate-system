@@ -187,7 +187,7 @@ Send a notification to users based on their preferences.
       "notification_type": "alert",
       "subject": "Security Alert",
       "body": "Unauthorized vehicle detected",
-      "recipient_names": ["security_team"],
+      "recipients": ["security_team@example.com"],
       "html": false
     }
     ```
@@ -199,7 +199,7 @@ Send a notification to users based on their preferences.
     | `notification_type` | string | Yes | Either `"alert"` or `"update"`. Determines which users receive the notification. |
     | `subject` | string | Yes | Email subject (max 200 chars). |
     | `body` | string | Yes | Email body content. |
-    | `recipient_names` | list | No | Optional list of specific usernames to send to. If omitted, sends to all users with matching preference. |
+    | `recipients` | list | No | Optional list of specific email addresses to send to. If omitted, sends to all users with matching preference. |
     | `html` | bool | No | If `true`, send body as HTML. Defaults to `false`. |
 
 ??? example "Response"

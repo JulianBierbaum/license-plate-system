@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, EmailStr, ConfigDict
 class UserPreferencesBase(BaseModel):
     """user preferences base model"""
 
-    name: str = Field(..., min_length=5, max_length=50)
+    name: str | None = Field(default=None, min_length=5, max_length=50)
     email: EmailStr = Field(..., min_length=5, max_length=50)
     receive_alerts: bool = False
     receive_updates: bool = False

@@ -21,9 +21,8 @@ class UserPreferences(NotificationBase):
     )
     name = Column(
         String(50),
-        unique=True,
+        nullable=True,
         index=True,
-        nullable=False,
     )
     email = Column(
         String(50),

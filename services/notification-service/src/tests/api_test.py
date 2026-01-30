@@ -35,18 +35,6 @@ def test_create_user_preferences_success(client: TestClient):
     assert 'id' in data
 
 
-def test_create_user_preferences_duplicate_name(client: TestClient, db: Session):
-    """
-    Test that creating a user with a duplicate name via API fails.
-    """
-    create_user_preference_entry(db, 'duplicate_api_user', 'unique@example.com')
-    response = client.post(
-        '/api/user_preferences/',
-        json={'name': 'duplicate_api_user', 'email': 'another@example.com'},
-    )
-    assert response.status_code == 400
-
-
 def test_get_all_user_preferences(client: TestClient, db: Session):
     """
     Test retrieving all user preferences via API.
@@ -126,20 +114,6 @@ def test_update_user_preferences_not_found(client: TestClient):
     assert response.status_code == 404
 
 
-def test_update_user_preferences_duplicate_name(client: TestClient, db: Session):
-    """
-    Test that updating a user to have a duplicate name fails.
-    """
-    create_user_preference_entry(db, 'existing_name_for_put', 'existing_put@example.com')
-    user_to_update = create_user_preference_entry(db, 'user_to_update_put', 'update_me_put@example.com')
-
-    response = client.put(
-        f'/api/user_preferences/{user_to_update.id}',
-        json={'name': 'existing_name_for_put'},
-    )
-    assert response.status_code == 400
-
-
 def test_delete_user_preferences_success(client: TestClient, db: Session):
     """
     Test successful deletion of user preferences.
@@ -169,5 +143,52 @@ def test_create_user_preferences_duplicate_email(client: TestClient, db: Session
     response = client.post(
         '/api/user_preferences/',
         json={'name': 'second_user_email', 'email': 'duplicate@example.com'},
+    )
+    assert response.status_code == 400
+
+
+def test_update_user_preferences_partial(client: TestClient, db: Session):
+    """
+    Test partial update of user preferences.
+    """
+    user_pref = create_user_preference_entry(db, 'partial_update_user', 'partial@example.com')
+    # Update only receive_alerts
+    response = client.put(
+        f'/api/user_preferences/{user_pref.id}',
+        json={'receive_alerts': False},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data['name'] == 'partial_update_user'
+    assert data['email'] == 'partial@example.com'
+    assert data['receive_alerts'] is False
+    assert data['receive_updates'] is False  # Original value
+
+
+def test_create_user_preferences_no_name(client: TestClient, db: Session):
+    """
+    Test creating user without providing a name (optional field).
+    """
+    response = client.post(
+        '/api/user_preferences/',
+        json={'email': 'noname@example.com', 'receive_alerts': True},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data['name'] is None
+    assert data['email'] == 'noname@example.com'
+    assert data['receive_alerts'] is True
+
+
+def test_update_user_preferences_duplicate_email(client: TestClient, db: Session):
+    """
+    Test that updating an email to one that already exists fails.
+    """
+    create_user_preference_entry(db, 'user_one', 'one@example.com')
+    user_two = create_user_preference_entry(db, 'user_two', 'two@example.com')
+
+    response = client.put(
+        f'/api/user_preferences/{user_two.id}',
+        json={'email': 'one@example.com'},
     )
     assert response.status_code == 400

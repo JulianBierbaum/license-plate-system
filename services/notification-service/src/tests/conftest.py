@@ -15,12 +15,15 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_
 def db():
     """
     Provides a SQLAlchemy session for each test function.
-    Each test will run within its own transaction, which is then rolled back
-    at the end of the test, ensuring data isolation without dropping tables.
+    Mocks session.commit() to be a flush() instead, so changes are visible
+    within the transaction but not persisted.
+    Rolls back the transaction at the end of the test.
     """
     connection = test_engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
+
+    session.commit = session.flush
 
     try:
         yield session
