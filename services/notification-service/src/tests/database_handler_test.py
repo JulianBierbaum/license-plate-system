@@ -50,17 +50,6 @@ def test_create_new_entry_successful(db: Session):
     assert retrieved_pref.name == name
 
 
-def test_create_new_entry_duplicate_name(db: Session):
-    """
-    Test that creating an entry with a duplicate name raises DuplicateEntryError.
-    """
-    name = 'duplicate_user'
-    create_user_preference_entry(db, name, 'first@example.com')
-
-    with pytest.raises(DuplicateEntryError):
-        create_user_preference_entry(db, name, 'second@example.com')
-
-
 def test_create_new_entry_duplicate_email(db: Session):
     """
     Test that creating an entry with a duplicate email raises DuplicateEntryError.
@@ -179,18 +168,6 @@ def test_update_entry_not_found(db: Session):
     update_data = UserPreferencesUpdate(name='any_name')
     with pytest.raises(MissingEntryError):
         db_handler.update_entry(db, update_data, 9999)
-
-
-def test_update_entry_duplicate_name(db: Session):
-    """
-    Test that updating an entry to a name that already exists raises DuplicateEntryError.
-    """
-    create_user_preference_entry(db, 'existing_name', 'existing@example.com')
-    user_to_update = create_user_preference_entry(db, 'user_to_update', 'update@example.com')
-
-    update_data = UserPreferencesUpdate(name='existing_name')
-    with pytest.raises(DuplicateEntryError):
-        db_handler.update_entry(db, update_data, user_to_update.id)
 
 
 def test_update_entry_duplicate_email(db: Session):

@@ -27,28 +27,25 @@ def send_notification(db: SessionDep, request: schemas.NotificationRequest):
         schemas.NotificationResponse: Results of the notification send operation
     """
     try:
-        if request.recipient_names:
-            users = crud.get_entries_by_names(db=db, names=request.recipient_names)
-            if request.notification_type == 'alert':
-                users = [u for u in users if u.receive_alerts]
-            else:
-                users = [u for u in users if u.receive_updates]
+        if request.recipients:
+            recipients = request.recipients
         else:
             if request.notification_type == 'alert':
                 users = crud.get_entries_by_preference(db=db, receive_alerts=True)
             else:
                 users = crud.get_entries_by_preference(db=db, receive_updates=True)
+            recipients = [user.email for user in users]
 
-        if not users:
+        # Remove duplicates
+        recipients = list(set(recipients))
+
+        if not recipients:
             return schemas.NotificationResponse(
                 total_recipients=0,
                 successful=0,
                 failed=0,
                 results=[],
             )
-
-        # Send notifications
-        recipients = [user.email for user in users]
 
         if request.notification_type == 'alert':
             results = email_handler.send_alert(recipients, request.subject, request.body, html=request.html)

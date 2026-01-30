@@ -106,14 +106,10 @@ def create_new_entry(db: Session, entry: UserPreferencesCreate) -> UserPreferenc
     Returns:
         UserPreferences: returns the added object
     """
-    entry.name = str(entry.name).lower()
     entry.email = str(entry.email).lower()
 
-    if get_entry_by_name(db=db, name=entry.name):
-        raise DuplicateEntryError('An entry with the same name already exists in the database')
-
     if get_entry_by_email(db=db, email=entry.email):
-        raise DuplicateEntryError('An entry with the same name already exists in the database')
+        raise DuplicateEntryError('An entry with the same email already exists in the database')
 
     db_entry = UserPreferences(
         name=entry.name,
@@ -150,21 +146,17 @@ def update_entry(db: Session, entry: UserPreferencesUpdate, entry_id: int) -> Us
     if not db_entry:
         raise MissingEntryError('No entry with the specified id found')
 
-    entry.name = str(entry.name).lower()
-    entry.email = str(entry.email).lower()
+    update_data = entry.model_dump(exclude_unset=True)
 
-    if get_entry_by_name(db=db, name=entry.name) and db_entry.name != entry.name:
-        raise DuplicateEntryError('An entry with the same name already exists in the database')
+    if 'email' in update_data and update_data['email']:
+        update_data['email'] = str(update_data['email']).lower()
+        if get_entry_by_email(db=db, email=update_data['email']) and db_entry.email != update_data['email']:
+            raise DuplicateEntryError('An entry with the same email already exists in the database')
 
-    if get_entry_by_email(db=db, email=entry.email) and db_entry.email != entry.email:
-        raise DuplicateEntryError('An entry with the same name already exists in the database')
+    for key, value in update_data.items():
+        setattr(db_entry, key, value)
 
     try:
-        update_data = entry.model_dump(exclude_unset=True)
-
-        for key, value in update_data.items():
-            setattr(db_entry, key, value)
-
         db.commit()
         db.refresh(db_entry)
         return db_entry
@@ -245,8 +237,7 @@ def get_entries_by_names(db: Session, names: list[str]) -> list[UserPreferences]
     """
     try:
         # Normalize names to lowercase for comparison
-        normalized_names = [name.lower() for name in names]
-        stmt = select(UserPreferences).where(UserPreferences.name.in_(normalized_names))
+        stmt = select(UserPreferences).where(UserPreferences.name.in_(names))
         return db.execute(stmt).scalars().all()
     except SQLAlchemyError as e:
         raise DatabaseQueryError(f'Failed to fetch user preferences by names: {e}') from e
