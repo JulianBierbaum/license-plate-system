@@ -108,7 +108,7 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroupAlias(timestamp, $__interval),\n  COUNT(*) AS \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n  $__timeGroupAlias(timestamp, $__interval),\n  COUNT(*) AS \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY 1\nORDER BY 1",
           "refId": "A"
         }
       ],
@@ -170,7 +170,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as \"Total Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')",
+          "rawSql": "SELECT COUNT(*) as \"Total Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
           "refId": "A"
         }
       ],
@@ -232,7 +232,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as \"Today's Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')",
+          "rawSql": "SELECT COUNT(*) as \"Today's Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
           "refId": "A"
         }
       ],
@@ -294,7 +294,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Average\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(*) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n    AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\n  GROUP BY day\n) t",
+          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Average\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(*) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n    AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\n  GROUP BY day\n) t",
           "refId": "A"
         }
       ],
@@ -356,7 +356,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT country_code) as \"Countries\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code IS NOT NULL\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')",
+          "rawSql": "SELECT COUNT(DISTINCT country_code) as \"Countries\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code IS NOT NULL\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
           "refId": "A"
         }
       ],
@@ -435,7 +435,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  UPPER(country_code) as country,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code IS NOT NULL\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY country\nORDER BY count DESC\nLIMIT 10",
+          "rawSql": "SELECT \n  UPPER(country_code) as country,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code IS NOT NULL\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY country\nORDER BY count DESC\nLIMIT 10",
           "refId": "A"
         }
       ],
@@ -611,7 +611,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  EXTRACT(HOUR FROM timestamp) as \"Hour of Day\",\n  COUNT(*) as \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n  EXTRACT(HOUR FROM timestamp) as \"Hour of Day\",\n  COUNT(*) as \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY 1\nORDER BY 1",
           "refId": "A"
         }
       ],
@@ -677,7 +677,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(make, 'Unknown') as \"Make\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY make\nORDER BY \"Count\" DESC\nLIMIT 15",
+          "rawSql": "SELECT \n  COALESCE(make, 'Unknown') as \"Make\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY make\nORDER BY \"Count\" DESC\nLIMIT 15",
           "refId": "A"
         }
       ],
@@ -743,7 +743,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(model, 'Unknown') as \"Model\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY model\nORDER BY \"Count\" DESC\nLIMIT 15",
+          "rawSql": "SELECT \n  COALESCE(model, 'Unknown') as \"Model\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY model\nORDER BY \"Count\" DESC\nLIMIT 15",
           "refId": "A"
         }
       ],
@@ -830,7 +830,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(color, 'Unknown') as color,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY color\nORDER BY count DESC\nLIMIT 10",
+          "rawSql": "SELECT \n  COALESCE(color, 'Unknown') as color,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY color\nORDER BY count DESC\nLIMIT 10",
           "refId": "A"
         }
       ],
@@ -918,7 +918,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(municipality, 'Not Available') as \"Municipality\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code = 'at'\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY municipality\nORDER BY \"Count\" DESC\nLIMIT 20",
+          "rawSql": "SELECT \n  COALESCE(municipality, 'Not Available') as \"Municipality\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code = 'at'\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY municipality\nORDER BY \"Count\" DESC\nLIMIT 20",
           "refId": "A"
         }
       ],
