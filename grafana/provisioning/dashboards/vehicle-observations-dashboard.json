@@ -859,7 +859,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n  EXTRACT(HOUR FROM timestamp) as \"Hour of Day\",\n  COUNT(*) as \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n  EXTRACT(HOUR FROM timestamp)::TEXT as \"Hour of Day\",\n  COUNT(*) as \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY 1\nORDER BY 1",
           "refId": "A"
         }
       ],
