@@ -108,25 +108,8 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  date_trunc('hour', timestamp) AS time,\n  COUNT(*) AS \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\nGROUP BY time\nORDER BY time",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
+          "rawSql": "SELECT\n  $__timeGroupAlias(timestamp, $__interval),\n  COUNT(*) AS \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
         }
       ],
       "title": "Vehicle Observations Over Time",
@@ -187,11 +170,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as \"Total Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)",
+          "rawSql": "SELECT COUNT(*) as \"Total Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')",
           "refId": "A"
         }
       ],
-      "title": "Total Observations",
+      "title": "Observations in Range",
       "type": "stat"
     },
     {
@@ -249,11 +232,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as \"Today's Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE AND $__timeFilter(timestamp)",
+          "rawSql": "SELECT COUNT(*) as \"Today's Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')",
           "refId": "A"
         }
       ],
-      "title": "Today's Observations",
+      "title": "Today's Total (Real-time)",
       "type": "stat"
     },
     {
@@ -311,7 +294,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Average\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(*) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n  GROUP BY day\n) t",
+          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Average\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(*) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n    AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\n  GROUP BY day\n) t",
           "refId": "A"
         }
       ],
@@ -373,7 +356,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT country_code) as \"Countries\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) AND country_code IS NOT NULL",
+          "rawSql": "SELECT COUNT(DISTINCT country_code) as \"Countries\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code IS NOT NULL\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')",
           "refId": "A"
         }
       ],
@@ -452,11 +435,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  UPPER(country_code) as country,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) AND country_code IS NOT NULL\nGROUP BY country\nORDER BY count DESC\nLIMIT 10",
+          "rawSql": "SELECT \n  UPPER(country_code) as country,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code IS NOT NULL\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY country\nORDER BY count DESC\nLIMIT 10",
           "refId": "A"
         }
       ],
-      "title": "Top Countries",
+      "title": "Top Countries for Filtered Type",
       "type": "piechart"
     },
     {
@@ -543,7 +526,96 @@
           "refId": "A"
         }
       ],
-      "title": "Vehicle Type Distribution",
+      "title": "Global Vehicle Type Distribution",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL - Ingestion Schema"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "PostgreSQL - Ingestion Schema"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  EXTRACT(HOUR FROM timestamp) as \"Hour of Day\",\n  COUNT(*) as \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY 1\nORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Traffic Density by Hour",
       "type": "barchart"
     },
     {
@@ -605,7 +677,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(make, 'Unknown') as \"Make\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\nGROUP BY make\nORDER BY \"Count\" DESC\nLIMIT 15",
+          "rawSql": "SELECT \n  COALESCE(make, 'Unknown') as \"Make\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY make\nORDER BY \"Count\" DESC\nLIMIT 15",
           "refId": "A"
         }
       ],
@@ -671,7 +743,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(model, 'Unknown') as \"Model\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\nGROUP BY model\nORDER BY \"Count\" DESC\nLIMIT 15",
+          "rawSql": "SELECT \n  COALESCE(model, 'Unknown') as \"Model\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY model\nORDER BY \"Count\" DESC\nLIMIT 15",
           "refId": "A"
         }
       ],
@@ -758,7 +830,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(color, 'Unknown') as color,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\nGROUP BY color\nORDER BY count DESC\nLIMIT 10",
+          "rawSql": "SELECT \n  COALESCE(color, 'Unknown') as color,\n  COUNT(*) as count\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY color\nORDER BY count DESC\nLIMIT 10",
           "refId": "A"
         }
       ],
@@ -846,101 +918,12 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT \n  COALESCE(municipality, 'Not Available') as \"Municipality\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) AND country_code = 'at'\nGROUP BY municipality\nORDER BY \"Count\" DESC\nLIMIT 20",
+          "rawSql": "SELECT \n  COALESCE(municipality, 'Not Available') as \"Municipality\",\n  COUNT(*) as \"Count\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp) \n  AND country_code = 'at'\n  AND (vehicle_type IN ($vehicle_type) OR '$vehicle_type' = 'All')\nGROUP BY municipality\nORDER BY \"Count\" DESC\nLIMIT 20",
           "refId": "A"
         }
       ],
       "title": "Austrian Municipalities (AT)",
       "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "PostgreSQL - Ingestion Schema"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "tooltip": false,
-              "viz": false,
-              "legend": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 32
-      },
-      "id": 13,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "PostgreSQL - Ingestion Schema"
-          },
-          "editorMode": "code",
-          "format": "time_series",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  date_trunc('hour', timestamp) AS time,\n  EXTRACT(HOUR FROM timestamp) as hour,\n  COUNT(*) as \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\nGROUP BY time, hour\nORDER BY time",
-          "refId": "A"
-        }
-      ],
-      "title": "Hourly Distribution",
-      "type": "timeseries"
     }
   ],
   "refresh": "",
@@ -951,16 +934,41 @@
     "vehicle-observations"
   ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": "All"
+        },
+        "datasource": {
+          "type": "postgres",
+          "uid": "PostgreSQL - Ingestion Schema"
+        },
+        "definition": "SELECT DISTINCT vehicle_type FROM ingestion_schema.vehicle_observations",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Vehicle Type",
+        "multi": true,
+        "name": "vehicle_type",
+        "options": [],
+        "query": "SELECT DISTINCT vehicle_type FROM ingestion_schema.vehicle_observations",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      }
+    ]
   },
   "time": {
-    "from": "2025-10-21T00:00:00.000Z",
-    "to": "2025-10-31T23:59:59.999Z"
+    "from": "now-7d",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Vehicle Observations Dashboard",
   "uid": "vehicle-observations",
-  "version": 1,
+  "version": 2,
   "weekStart": ""
 }
