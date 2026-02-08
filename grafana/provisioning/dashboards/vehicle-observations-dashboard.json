@@ -108,11 +108,11 @@
           "editorMode": "code",
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT\n  $__timeGroupAlias(timestamp, $__interval),\n  COUNT(*) AS \"Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY 1\nORDER BY 1",
+          "rawSql": "SELECT\n  $__timeGroupAlias(timestamp, $__interval),\n  COUNT(DISTINCT plate_hash) AS \"Unique Vehicles\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\nGROUP BY 1\nORDER BY 1",
           "refId": "A"
         }
       ],
-      "title": "Vehicle Observations Over Time",
+      "title": "Unique Vehicles Over Time",
       "type": "timeseries"
     },
     {
@@ -170,11 +170,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as \"Total Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
+          "rawSql": "SELECT COUNT(DISTINCT plate_hash) as \"Unique Vehicles\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
           "refId": "A"
         }
       ],
-      "title": "Observations in Range",
+      "title": "Unique Vehicles in Range",
       "type": "stat"
     },
     {
@@ -232,11 +232,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) as \"Today's Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
+          "rawSql": "SELECT COUNT(DISTINCT plate_hash) as \"Unique Vehicles Today\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
           "refId": "A"
         }
       ],
-      "title": "Today's Total (Real-time)",
+      "title": "Unique Vehicles Today",
       "type": "stat"
     },
     {
@@ -294,11 +294,11 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Average\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(*) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n    AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\n  GROUP BY day\n) t",
+          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Avg Unique Vehicles\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(DISTINCT plate_hash) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n    AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\n  GROUP BY day\n) t",
           "refId": "A"
         }
       ],
-      "title": "Daily Average",
+      "title": "Daily Average (Unique)",
       "type": "stat"
     },
     {
@@ -371,6 +371,254 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 16
+      },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "PostgreSQL - Ingestion Schema"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) as \"Total Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Observations in Range",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL - Ingestion Schema"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 16
+      },
+      "id": 15,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "PostgreSQL - Ingestion Schema"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(*) as \"Today's Observations\"\nFROM ingestion_schema.vehicle_observations\nWHERE DATE(timestamp) = CURRENT_DATE\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
+          "refId": "A"
+        }
+      ],
+      "title": "Total Observations Today",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL - Ingestion Schema"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 16
+      },
+      "id": 16,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "PostgreSQL - Ingestion Schema"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT ROUND(AVG(daily_count)::numeric, 1) as \"Daily Avg Observations\"\nFROM (\n  SELECT DATE(timestamp) as day, COUNT(*) as daily_count\n  FROM ingestion_schema.vehicle_observations\n  WHERE $__timeFilter(timestamp)\n    AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')\n  GROUP BY day\n) t",
+          "refId": "A"
+        }
+      ],
+      "title": "Daily Average (All Observations)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL - Ingestion Schema"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 16
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": false,
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": ""
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.0.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "PostgreSQL - Ingestion Schema"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT COUNT(DISTINCT vehicle_type) as \"Vehicle Types Seen\"\nFROM ingestion_schema.vehicle_observations\nWHERE $__timeFilter(timestamp)\n  AND (vehicle_type IN (${vehicle_type:singlequote}) OR '${vehicle_type:raw}' = 'All')",
+          "refId": "A"
+        }
+      ],
+      "title": "Vehicle Types Seen",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "PostgreSQL - Ingestion Schema"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "palette-classic"
           },
           "custom": {
@@ -388,7 +636,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 16
+        "y": 20
       },
       "id": 6,
       "transformations": [
@@ -489,7 +737,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 16
+        "y": 20
       },
       "id": 7,
       "options": {
@@ -587,7 +835,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 16
+        "y": 20
       },
       "id": 13,
       "options": {
@@ -652,7 +900,7 @@
         "h": 8,
         "w": 8,
         "x": 0,
-        "y": 24
+        "y": 28
       },
       "id": 9,
       "options": {
@@ -718,7 +966,7 @@
         "h": 8,
         "w": 8,
         "x": 8,
-        "y": 24
+        "y": 28
       },
       "id": 10,
       "options": {
@@ -797,7 +1045,7 @@
         "h": 8,
         "w": 8,
         "x": 16,
-        "y": 24
+        "y": 28
       },
       "id": 11,
       "options": {
@@ -893,7 +1141,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 32
+        "y": 36
       },
       "id": 12,
       "options": {
