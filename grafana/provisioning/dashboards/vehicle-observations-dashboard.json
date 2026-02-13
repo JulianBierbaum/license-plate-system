@@ -83,6 +83,7 @@
         "y": 0
       },
       "id": 1,
+      "interval": "1h",
       "options": {
         "legend": {
           "calcs": [
@@ -1217,6 +1218,6 @@
   "timezone": "browser",
   "title": "Vehicle Observations Dashboard",
   "uid": "vehicle-observations",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
