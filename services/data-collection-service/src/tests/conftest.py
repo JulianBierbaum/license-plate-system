@@ -4,7 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from src.config import settings
-from src.db.session import get_db  # Assuming this is your dependency override point
+from src.db.session import get_db
 from src.main import app
 
 test_engine = create_engine(str(settings.db_uri))
